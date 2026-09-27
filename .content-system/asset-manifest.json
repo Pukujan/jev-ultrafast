@@ -1,0 +1,27 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.5.4",
+  "assets": [
+    {
+      "path": "docs/flights-result.png",
+      "role": "product-screenshot",
+      "usage": "README evidence of verified Flights result",
+      "hash": "25898fdc4d4e4ccf4b7ac6e9ef0f86e469b445181dfee9a83b6725e6f32b90fa",
+      "note": "Existing committed product asset; not generated for this adoption."
+    },
+    {
+      "path": "docs/inspector.png",
+      "role": "product-screenshot",
+      "usage": "Local inspector showing numbered elements",
+      "hash": "8bc3c8783478511fe2f631399a47f3e9f10593781224c571bcbb90825148a081",
+      "note": "Existing committed product asset; not generated for this adoption."
+    },
+    {
+      "path": "docs/demo.gif",
+      "role": "product-demo",
+      "usage": "1x-speed Flights demo gif",
+      "hash": "3ba041d1c574f62a0f986df9bc4f7594bbd0cfb372694aaeff802cffe012f96a",
+      "note": "Existing committed product asset; not generated for this adoption."
+    }
+  ]
+}

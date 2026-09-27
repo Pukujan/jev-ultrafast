@@ -1,34 +1,22 @@
-# Jev Ultrafast
+# Current Handoff
 
-Read README.md, PROJECT.md, and checkpoints/CURRENT.md before editing. Keep the loop small: page -> indexed elements -> operation + target -> execution.
+Start from repository state, not prior chat history.
 
-- The input is one natural-language goal. Do not add site-specific plans or hardcoded field values.
-- OpenRouter Decisions (model `typesafe/jev-1.13`) chooses an operation and operation-specific target heads in one request. Consume only the selected operation's target. **No TypeSafe key.**
-- Targets must map to observed elements and supported operations. Never let the model emit selectors or executable code.
-- TYPE_TEXT invokes the text LLM (`TEXT_MODEL_*` via OpenRouter chat). Cache a stale retry's value only while its entire helper input is identical.
-- Never retry a browser mutation. Log execution before observing its result.
-- Screenshots are optional; the model does not consume them. Keep demonstration footage at its original speed.
-- Keep credentials server-side and .env ignored. Tests must not call paid APIs. Never print secrets or API keys.
-- Verify actual final outcomes independently. A DONE choice is not proof of success.
-- Keep examples, README claims, raw evidence, and model-call counts consistent.
-- Work on a branch; open a PR to `main`. Do not push directly to `main`.
+## Read order
 
-## Policy
+1. `PROJECT.md`
+2. `AGENTS.md` when present
+3. `checkpoints/CURRENT.md`
+4. the active task named by CURRENT
+5. the minimum relevant specification/design document
 
-Full rules: [docs/POLICY.md](docs/POLICY.md).
+Before editing a GitHub task, run `continuity issue verify <TASK-ID>` and confirm the live issue is open and matches the task.
 
-- Adopters (e.g. Study-os) **use** Ultrafast for crawls/defect reports — they do **not** own fork code.
-- This repo's Grok Bot owns OpenRouter Decisions wiring, harness/CDP, artifact schema alignment, and Ultrafast code changes.
-- OpenRouter Decisions only (no TypeSafe key): `POST https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.13`.
-- Study-os live target: https://study.design-bakery.com (guest). Defect contract: Study-os `docs/PDD_UX_DEFECT_EXPLORATION.md` + `docs/schemas/ux-defect-report.v1.json`.
+## Authority
 
-## Delivery gates
+GitHub Issues are authoritative for task scope, priority, ownership, dependencies, acceptance, and lifecycle; the linked task file is a compact working cache. Merged default-branch history is authoritative for accepted code. PR checks and merge evidence are authoritative for delivery. Chat and context packs are derived. Before resuming, verify the linked issue and read current GitHub status.
 
-- PR-only to `main`.
-- Required status check: **`gates`** (when GitHub Actions can run).
-- Prefer squash auto-merge when green.
-
-Checks: `uv run ruff check .`, `uv run pytest`, `node --check jev_ultrafast/static/app.js`, `uv build`.
+When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
 <!-- pcm:github-progression:start -->
 ## GitHub-owned progression
@@ -54,6 +42,28 @@ Required CI and GitHub auto-merge are mandatory. Arm auto-merge only after the i
 Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with "Refs #<number>" and use closing keywords only when closing at merge is intended. **Diagrams (mermaid):** when a record describes a flow with 4+ ordered steps or 2+ branches, add a fenced mermaid diagram *and* keep an adjacent text list or table so the record survives render failure; default to `graph TD` (vertical) because wide `LR` flows shrink to illegible strips on phones — reserve `LR` for 4 or fewer short nodes; cap 8 nodes and 6-word labels; wrap diagrams that may exceed the container width inside `<details>` (GitHub mounts the renderer lazily on expand); preview the rendered diagram before publishing (broken syntax shows a visible parse error) and never cite renderer URLs as standalone sources. **Readability rules:** give every SHA, comment id, flag, file path, or tool name a plain-word meaning in the same sentence before it carries load; write evidence as the claim first, numbers as support (“nothing this change could break failed (263 tests, same six machine-environment failures as before)”), never bare counts; no unexplained acronym or bare identifier on first use in any tier; PR openings and checkpoint Completed/Next lines start with one problem sentence a newcomer can follow; the rule set applies to CURRENT projections and checkpoint entries exactly as to issue logs. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.
 <!-- pcm:issue-log-format:end -->
 
-## Continuity start
+## Workspace mode: managed task worktrees
 
-For GitHub work, verify the live linked issue with `continuity issue verify <TASK-ID>` before resuming. Issue owns scope/lifecycle; merged history owns accepted code; PR checks own delivery. Link progress with `Refs #<number>`; use closing keywords only when the merge should close the issue.
+The Git repository, remote, and task history stay canonical; the main checkout remains the permanent home base. Use it for sequential work. Create a linked worktree only when parallel work or isolation is actually useful, at `<canonical-root>/pcm/worktree/<TASK-ID>`. Use one per independent active task, not one per session or agent; a new session continuing that task resumes the same tree. Do not create sibling clones or arbitrary worktree paths.
+
+Before creating a tree, PCM checks Git's registered worktrees and the private per-device workspace registry. Register existing checkouts on other drives with `continuity workspace register --root <checkout>`. One clean, unlocked match for the same remote/task/ref is reused; a dirty, locked, conflicting, or ambiguous match stops before creation. PCM does not scan drives. Registry paths are local-only and must never be copied into issues, commits, PRs, or handoffs.
+
+After the task is pushed, required CI passes, its pull request is merged into the remote default branch, and its task record is complete, run `continuity worktree remove <TASK-ID>`. Removal verifies the GitHub PR, required checks, and merged commit; it refuses locked/pinned, dirty, untracked, unpublished, unmerged, or unverifiable work. For a short audit hold, record the reason, expected release date, private workspace ID, and unlock/remove next action in the completed task's checkpoint, then lock it with `git worktree lock --reason "<reason; release YYYY-MM-DD>" <path>`. The lock makes normal cleanup refuse the tree and is not a cleanup exemption. When the audit ends, return to the permanent checkout, run `git worktree unlock <path>`, then `continuity worktree remove <TASK-ID>` to complete verified cleanup. For other Git hosts without a verified CI adapter, it leaves the tree in place. Never force-remove it. Keep unfinished or user-modified work for recovery.
+
+Linked worktrees share the repository's Git object store; they are not full repository clones. Reuse package-manager download/build caches and installed runtimes where supported. Keep mutable `node_modules` and `.venv` environments separate when lockfiles or interpreters differ; store dependency changes in tracked manifests/lockfiles or patch files, not as hidden edits inside an installed environment. Remove the task worktree after verified merge and completion.
+
+## Finding earlier project documents
+
+When `.continuity/documents.json` is present, it is the machine-readable inventory and `docs/CONTINUITY_INDEX.md` is its generated human view. Every fresh session or task takeover/resumption must consult the inventory before choosing its next action, not only before writing a document: run `git fetch origin`, then use `continuity docs find "<issue title and task-objective terms>" --task <TASK-ID>` and read matching records and their declared neighbors. The search is deterministic metadata search, not semantic whole-repository search. `continuity validate` checks the generated view; use `continuity docs render` to refresh its freshness labels after source edits. A `NEEDS_REVIEW` result preserves historical evidence but says not to rely on it without checking the current file.
+
+## Continuity records
+
+<!-- pcm:policy {"id":"continuity-records","policy_version":"1.3.0","protocol_version":"0.1.0-draft"} -->
+
+Write continuity issues, updates, pull requests, and project-state documents so a fresh reader can understand the problem, human outcome, scope, evidence, and next action. Cite external claims and link repository claims to a revision or CI result. Include reproduction detail only when needed to verify the claim. Keep PR openings skimmable; link long logs. Do not claim automatic tracker synchronization or chat capture unless implemented and tested.
+
+## Degraded continuity
+
+Execution safety and existing authorization outrank continuity bookkeeping. If a canonical continuity file is temporarily unavailable, do not stop safe work, repair storage just to force a checkpoint, or ask again for an already-authorized host/worktree. Use an authorized alternate checkout and run `continuity checkpoint <TASK-ID> --root <canonical-root> --recovery-root <alternate-root> ...` to write a JSON recovery receipt under `.continuity/recovery/`; do not create an ad-hoc Markdown checkpoint or replace the alternate task file. Reconcile it into the canonical task with `continuity recovery reconcile --root <canonical-root> --file <receipt>` when writable. The repository/task lineage is authoritative; a physical path is not.
+
+Normal checkpointing is a delivery operation, not a local note: commit the product change first, then run `continuity checkpoint`. The command prints a `REQUEST_ID`, commits the canonical checkpoint and synchronously pushes the task branch to `origin`; if interrupted, rerun with the same `--request-id` to avoid a duplicate (changed payload with the same ID is rejected). Open or update a PR after pushing. GitHub CI and auto-merge then run asynchronously and wait for required reviews/checks and any merge queue. Confirm the merge before marking the task complete or removing its worktree.
