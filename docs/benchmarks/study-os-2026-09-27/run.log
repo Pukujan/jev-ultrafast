@@ -1,0 +1,120 @@
+uv : Traceback (most recent call last):
+At C:\Users\pujan\AppData\Local\Temp\ps-script-6b827ce7-3b26-4835-a399-731fc86247a9.ps1:192 char:1
++ uv run python "artifacts\study-os-full-crawl\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "artifacts\study-os-full-crawl\20260927-054810\full_defect_crawl.py", line 277, in 
+run_phase
+    snap = agent.command("tick")
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "jev_ultrafast\agent.py", line 57, in command
+    self.command("predict", {})
+  File "jev_ultrafast\agent.py", line 77, in command
+    state["decision"] = choose(state["page"], state["goal"], state["history"])
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "jev_ultrafast\model.py", line 137, in choose
+    target_answer = validate_choice(result["answers"].get(operation.lower() + "_target", {}), targets[operation])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "jev_ultrafast\model.py", line 44, in validate_choice
+    raise ValueError("Invalid TypeSafe response; no action executed.")
+ValueError: Invalid TypeSafe response; no action executed.
+DEFECT P2 Harness screenshot IPC timeout during guest explore @ https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c
+
+===== PHASE home_and_lanes =====
+  1 [home_and_lanes] click 'Start' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+  2 [home_and_lanes] click 'Study OS' changed=True -> https://study.design-bakery.com/
+  3 [home_and_lanes] click 'Start' changed=True -> https://study.design-bakery.com/
+  4 [home_and_lanes] click 'Continue' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+  5 [home_and_lanes] click 'Study OS' changed=True -> https://study.design-bakery.com/
+  6 [home_and_lanes] click 'Resume' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Missing Back/exit control on play surface @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+
+===== PHASE hesi_fractions_lesson =====
+  7 [hesi_fractions_lesson] click 'Start' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+DEFECT P2 Possible teach/probe answer co-visibility (spoil risk) @ https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c
+  8 [hesi_fractions_lesson] click 'Explain again' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+  9 [hesi_fractions_lesson] click 'Open study assistant' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 10 [hesi_fractions_lesson] click 'Show a worked example' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 11 [hesi_fractions_lesson] fill 'Message' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 12 [hesi_fractions_lesson] click 'Send' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 13 [hesi_fractions_lesson] click 'Collapse' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 14 [hesi_fractions_lesson] click 'Save progress' changed=True -> https://study.design-bakery.com/
+ 15 [hesi_fractions_lesson] click 'Start' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+DEFECT P0 Dead/no-op control: Worked example @ https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c
+ 16 [hesi_fractions_lesson] click 'Worked example' changed=False -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 17 [hesi_fractions_lesson] click 'Open study assistant' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 18 [hesi_fractions_lesson] click 'Voice input' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+ 19 [hesi_fractions_lesson] click 'Explain again' changed=True -> https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a6
+
+===== PHASE dsa_big_o_lesson =====
+ 20 [dsa_big_o_lesson] click 'Resume' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 21 [dsa_big_o_lesson] click 'Explain again' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Dead/no-op control: Read aloud @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+ 22 [dsa_big_o_lesson] click 'Read aloud' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 23 [dsa_big_o_lesson] click 'Voice input' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 24 [dsa_big_o_lesson] click 'Open study assistant' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 25 [dsa_big_o_lesson] click 'Show a worked example' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 26 [dsa_big_o_lesson] click 'Back' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 27 [dsa_big_o_lesson] click 'Open Message' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Dead/no-op control: Open Message @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+ 28 [dsa_big_o_lesson] click 'Open Message' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 29 [dsa_big_o_lesson] click 'Open Message' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Missing Back/exit control on play surface @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+
+===== PHASE sliding_window_and_misc =====
+ 30 [sliding_window_and_misc] click 'Start' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 31 [sliding_window_and_misc] click 'Continue' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 32 [sliding_window_and_misc] click 'Explain again' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 33 [sliding_window_and_misc] click 'Open study assistant' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 34 [sliding_window_and_misc] click 'Show a worked example' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 35 [sliding_window_and_misc] click 'Back' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 36 [sliding_window_and_misc] click '1 Ready' changed=True -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+DEFECT P1 Dead/no-op control: Voice input @ https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae09945d
+ 37 [sliding_window_and_misc] click 'Voice input' changed=False -> https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae099
+ 38 [sliding_window_and_misc] click 'Study OS' changed=True -> https://study.design-bakery.com/
+ 39 [sliding_window_and_misc] click 'Resume' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 40 [sliding_window_and_misc] click '1 Why' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 41 [sliding_window_and_misc] click 'Continue' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 42 [sliding_window_and_misc] click '1 Why' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 43 [sliding_window_and_misc] click 'Continue' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 44 [sliding_window_and_misc] click 'Explain again' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 45 [sliding_window_and_misc] click 'Read aloud' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 46 [sliding_window_and_misc] click 'Open study assistant' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 47 [sliding_window_and_misc] click 'Show a worked example' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 48 [sliding_window_and_misc] click 'Back' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 49 [sliding_window_and_misc] click 'Study OS' changed=True -> https://study.design-bakery.com/
+ 50 [sliding_window_and_misc] click 'Resume' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Dead/no-op control: Voice input @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+ 51 [sliding_window_and_misc] click 'Voice input' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 52 [sliding_window_and_misc] click 'Ask the tutor' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 53 [sliding_window_and_misc] click '1 Why' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 54 [sliding_window_and_misc] click 'Continue' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 55 [sliding_window_and_misc] click 'Explain again' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 56 [sliding_window_and_misc] click '1 Why' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 57 [sliding_window_and_misc] click 'Continue' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 58 [sliding_window_and_misc] click 'Worked example' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 59 [sliding_window_and_misc] click 'Back' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Missing Back/exit control on play surface @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+
+===== PHASE controls_sweep =====
+ 60 [controls_sweep] click 'Resume' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 61 [controls_sweep] click 'Explain again' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 62 [controls_sweep] click 'Read aloud' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 63 [controls_sweep] click 'Voice input' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 64 [controls_sweep] click 'Open study assistant' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 65 [controls_sweep] click 'Show a worked example' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 66 [controls_sweep] click 'Collapse' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 67 [controls_sweep] click 'Save progress' changed=True -> https://study.design-bakery.com/
+ 68 [controls_sweep] click 'Resume' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 69 [controls_sweep] click 'Rate 1 out of 5' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 70 [controls_sweep] click 'Explain again' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 71 [controls_sweep] click '1 Why' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 72 [controls_sweep] click 'Continue' changed=True -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 73 [controls_sweep] click 'Read aloud' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+DEFECT P1 Dead/no-op control: Open Your answer @ https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c
+ 74 [controls_sweep] click 'Open Your answer' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+ 75 [controls_sweep] click 'Voice input' changed=False -> https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2f
+Wrote artifacts\study-os-full-crawl\20260927-054810\report.md and summary.json defects=11
+DONE_CRAWL {"actions": 75, "decisions": 103, "defects": 11, "openrouter_ok": true, "art": "D:\\claude\\jev-ultrafast\\artifacts\\study-os-full-crawl\\20260927-054810"}
