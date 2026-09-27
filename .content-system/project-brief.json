@@ -1,0 +1,91 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "Jev Ultrafast",
+  "audience": [
+    "Engineers building browser agents who need validated click/type/select actions without model-emitted selectors",
+    "Adopters (e.g. Study-os) running guest UX defect crawls against a live product"
+  ],
+  "problem": "Script-style browser agents invent brittle selectors or executable code; people need a small loop that chooses among observed page controls for one natural-language goal.",
+  "solution": "Ultrafast indexes visible controls, asks OpenRouter Decisions (typesafe/jev-1.13) for operation + target in one request, and only calls a text model when TYPE_TEXT is selected.",
+  "mechanism": [
+    "Browser Harness / Chrome CDP snapshot builds an indexed element table",
+    "One OpenRouter Decisions POST returns operation and speculative target heads",
+    "Executor acts only on the selected observed target; TYPE_TEXT uses TEXT_MODEL_*",
+    "Independent outcome checks; artifacts logged for Study-os-style defect exploration"
+  ],
+  "evidence": [
+    {
+      "claim": "A recorded Google Flights demo completes the natural-language search in about 7.1 seconds at 1x, with independent route/date/result verification.",
+      "source": "docs/performance.md and docs/flights-measurement.json",
+      "status": "shipped",
+      "supports": "The repository records a timed Flights run (7.073 s) with model/browser work included after initial observation, plus matched-run comparisons.",
+      "limits": "Three matched pairs are too few for a strong statistical claim; live network and caches remain variables. Does not prove every site is this fast.",
+      "recorded_at": "2026-09-27T05:58:00Z",
+      "cite_in_readme": true,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "docs/performance.md @ 041d524 (faster-on-the-real-web)",
+        "repository": "Pukujan/jev-ultrafast",
+        "commit": "041d5242bb9159a588b09d303a19a0208cf9a95c",
+        "path": "docs/performance.md",
+        "locator": "faster-on-the-real-web",
+        "uri": "https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/performance.md#faster-on-the-real-web"
+      }
+    },
+    {
+      "claim": "Supported decision auth is OpenRouter Decisions with OPENROUTER_API_KEY only; a TypeSafe key is not required.",
+      "source": "docs/POLICY.md and docs/OPENROUTER-DECISIONS.md",
+      "status": "shipped",
+      "supports": "POLICY and OpenRouter docs name endpoint https://openrouter.ai/api/alpha/decisions, model typesafe/jev-1.13, and forbid requiring a TypeSafe key.",
+      "limits": "Docs describe the supported path; readers must still verify the checked-in model client matches POLICY on their revision.",
+      "recorded_at": "2026-09-27T05:58:00Z",
+      "cite_in_readme": true,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "docs/POLICY.md @ 041d524 (openrouter-decisions-only)",
+        "repository": "Pukujan/jev-ultrafast",
+        "commit": "041d5242bb9159a588b09d303a19a0208cf9a95c",
+        "path": "docs/POLICY.md",
+        "locator": "openrouter-decisions-only",
+        "uri": "https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only"
+      }
+    },
+    {
+      "claim": "A Study-os guest UX defect crawl against study.design-bakery.com produced action/decision artifacts and an 11-defect report summary.",
+      "source": "docs/benchmarks/study-os-2026-09-27/",
+      "status": "experimentally_supported",
+      "supports": "Committed benchmark folder records duration, pages visited, openrouter_decisions_ok, and defect_count 11 for the 2026-09-27 run.",
+      "limits": "Status is partial; does not prove full Study-os PDD coverage or that every defect matches the external schema byte-for-byte.",
+      "recorded_at": "2026-09-27T05:58:00Z",
+      "cite_in_readme": true,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "docs/benchmarks/study-os-2026-09-27/summary.json @ 041d524 (L1)",
+        "repository": "Pukujan/jev-ultrafast",
+        "commit": "041d5242bb9159a588b09d303a19a0208cf9a95c",
+        "path": "docs/benchmarks/study-os-2026-09-27/summary.json",
+        "locator": "L1",
+        "uri": "https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/benchmarks/study-os-2026-09-27/summary.json#L1"
+      }
+    }
+  ],
+  "boundaries": [
+    "Does not book flights or complete purchases; demos stop at visible verified options.",
+    "Does not own Study-os product code or private study-log data.",
+    "Does not require a TypeSafe account.",
+    "Model output must never become selectors, coordinates, shell, or executable JavaScript.",
+    "No invented performance metrics beyond committed measurement docs."
+  ],
+  "terminology": {
+    "preferred": {
+      "OpenRouter Decisions": "The alpha Decisions HTTP API used for operation/target choice",
+      "TYPE_TEXT": "The only operation that invokes the separate text LLM",
+      "Browser Harness": "Chrome CDP connection helper installed by uv sync"
+    },
+    "avoid": [
+      "requires TypeSafe key",
+      "model emits selectors",
+      "auto-books flights"
+    ]
+  }
+}

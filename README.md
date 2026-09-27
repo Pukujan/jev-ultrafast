@@ -1,73 +1,75 @@
-<img src="docs/banner.svg" alt="Jev Ultrafast · Browser Use × TypeSafe" width="100%" />
+# Jev Ultrafast
 
-# Jev Ultrafast ⚡
+> **One natural-language goal. Indexed page controls. One Decisions request picks the next move.**
 
-> [!IMPORTANT]
-> **The Browser Use Cloud waitlist is open.** Get early access to ultrafast browser agents in the cloud.
-> **[Join the waitlist →](https://browser-use.com/ultrafast?utm_source=github&utm_medium=readme&utm_campaign=jev-ultrafast)**
+A browser agent with a **dynamic, indexed action space** — built for real sites, not invented selectors.
 
-**A browser agent with a dynamic, indexed action space.**
-
-Give it one goal. [TypeSafe's Jev](https://docs.typesafe.ai/introduction) picks an operation and an element. A small LLM writes text only when the operation is `TYPE_TEXT`.
-
-**Zürich → London on Google Flights in 7.1 seconds.** One natural-language goal, actual text generation, and loading waits included.
-
-<a href="docs/demo.mp4"><img src="docs/demo.gif" alt="A real Google Flights search at 1× speed, with generated city names and dynamic operation/target decisions" width="100%" /></a>
+<img src="docs/demo.gif" alt="Google Flights search at 1x speed with generated city names and dynamic operation/target decisions" width="100%" />
 
 [Watch the MP4](docs/demo.mp4) · [Measurements](docs/performance.md) · [Read the loop](jev_ultrafast/agent.py)
 
-## The action space
+## Why this exists
 
-Every observation produces a new element table:
+You want an agent to finish a real page task — search flights, open a Wikipedia article, explore a lesson as a guest — without hand-written site scripts. Prompting a model to invent Playwright or CSS selectors looks easy until the DOM shifts, a control is covered, or the model emits something the browser should never run.
+
+**Selectors from the model are out of bounds.** Ultrafast observes the page, numbers the controls you can actually use, and asks [OpenRouter Decisions](https://openrouter.ai/docs/guides/community/jev) (`typesafe/jev-1.13`) for an operation and a target in **one request**. A small text model runs only when the operation is `TYPE_TEXT`.
+
+## What this project is
+
+Ultrafast is a small Python agent and local inspector for engineers and adopters who need **validated click / type / select / scroll / wait** cycles on Chrome via [Browser Harness](https://github.com/browser-use/browser-harness).
+
+It is **not** a booking bot, not a Study-os product fork, and **not** a TypeSafe-account requirement. Auth for decisions is `OPENROUTER_API_KEY` only ([policy](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only)).
+
+Fork lineage: this repository is [Pukujan/jev-ultrafast](https://github.com/Pukujan/jev-ultrafast), based on upstream [browser-use/jev-ultrafast](https://github.com/browser-use/jev-ultrafast).
+
+## What you can make or use
+
+- **Library agent** — `Agent(url, goal)` iterates until DONE / BLOCKED / budget.
+- **Local inspector** — `uv run jev` at http://127.0.0.1:8766 with numbered elements and probabilities.
+- **Study-os guest crawls** — explore https://study.design-bakery.com and log artifacts aligned to the Study-os UX defect contract by reference (see [docs/POLICY.md](docs/POLICY.md)).
+- **Committed demos** — Flights and Wikipedia examples under `examples/`, plus measurement docs.
+
+## How it works
+
+1. **Observe** — Chrome CDP snapshot via Browser Harness yields visible controls and page text.
+2. **Index** — Build an element table (`CLICK`, `TYPE_TEXT`, `SELECT`, …) from what is actually on the page.
+3. **Decide** — One `POST https://openrouter.ai/api/alpha/decisions` returns operation + speculative target heads ([details](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/OPENROUTER-DECISIONS.md)).
+4. **Act** — Execute only the selected observed target. `TYPE_TEXT` may call `TEXT_MODEL_*` (OpenRouter chat) to fill a field.
+5. **Verify** — Log execution before re-observing; check final outcomes independently. `DONE` is not proof.
 
 ```text
 [1] button    Change ticket type · Round trip
 [2] combobox  Where from?        · San Francisco
 [3] combobox  Where to?          · empty
-[4] textbox   Departure          · empty
 ...
 ```
 
-The operations are `CLICK`, `TYPE_TEXT`, `SELECT`, `SCROLL_UP`, `SCROLL_DOWN`, `WAIT`, `DONE`, and `BLOCKED`. Only supported operations and targets are offered.
+Operations: `CLICK`, `TYPE_TEXT`, `SELECT`, `SCROLL_UP`, `SCROLL_DOWN`, `WAIT`, `DONE`, `BLOCKED`. Target heads stay speculative until the chosen operation selects one.
 
-```text
-                      one TypeSafe request
-                     ┌───────────────────────────┐
-page → element table → operation                 │
-                     │ click_target              │
-                     │ type_text_target          │
-                     │ select_target, if present │
-                     └─────────────┬─────────────┘
-                         use the matching target
-                                   │
-                    CLICK [7] ─────┤──→ browser
-                TYPE_TEXT [3] ─────┘
-                          ↓
-                   small LLM → text → browser
-```
+## Evidence and boundaries
 
-Target questions are speculative. If the operation is `CLICK`, only `click_target` can execute. Two decisions, **one network round trip**. Each target head contains only compatible elements. Native dropdown choices carry an observed element/option index.
+| Claim | What the evidence supports | What it does not establish | Source |
+| --- | --- | --- | --- |
+| Flights demo ~7.1 s at 1× with independent verification | Timed run (7.073 s) after first observation, including model + browser work; matched-run medians in the performance doc | Broad agent benchmark; strong statistics (three pairs) | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/performance.md#faster-on-the-real-web](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/performance.md#faster-on-the-real-web) |
+| OpenRouter Decisions only; no TypeSafe key | POLICY names endpoint, model `typesafe/jev-1.13`, and OpenRouter auth | Every historical upstream README sentence — prefer POLICY on this fork | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only) |
+| Study-os guest crawl artifacts exist | 2026-09-27 summary: pages visited, `openrouter_decisions_ok`, defect_count 11 | Full PDD coverage or schema byte-identity with Study-os | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/benchmarks/study-os-2026-09-27/summary.json#L1](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/benchmarks/study-os-2026-09-27/summary.json#L1) |
 
-There are no site-specific action scripts or prepared field strings in the policy. The Flights example supplies a goal and independently verifies the outcome. The screenshot renderer adds labels afterward; it does not drive the browser.
+**Boundaries:** demos do not book or purchase; Ultrafast does not own Study-os code or private study logs; the model must never emit selectors, coordinates, shell, or executable JavaScript.
 
 ## Try it
 
 ```bash
-git clone https://github.com/browser-use/jev-ultrafast.git
+git clone https://github.com/Pukujan/jev-ultrafast.git
 cd jev-ultrafast
 uv sync
 cp .env.example .env
-# Add TYPESAFE_API_KEY and TEXT_MODEL_API_KEY.
+# Set OPENROUTER_API_KEY (Decisions). For TYPE_TEXT, set TEXT_MODEL_API_KEY (often the same OpenRouter key).
 uv run jev
 ```
 
-Open **http://127.0.0.1:8766** and click **Start demo → Run automatically**. The inspector shows numbered elements, operation probabilities, target probabilities, and executed actions. **Choose next** pauses before execution.
+Open **http://127.0.0.1:8766** → **Start demo → Run automatically**. Allow remote debugging in Chrome when prompted. Run `uv run browser-harness --doctor` if the connection needs help.
 
-Chrome connects through [Browser Harness](https://github.com/browser-use/browser-harness), installed by `uv sync`. Run `uv run browser-harness --doctor` if it needs connecting. Allow remote debugging in Chrome when prompted.
-
-`TEXT_MODEL_API_KEY` is an OpenRouter key in the example configuration. The current demo uses `inception/mercury-2.5` with reasoning disabled. Gemini, GLM, and DeepSeek can also use the OpenAI-compatible text helper; configure the appropriate model, endpoint, and reasoning setting.
-
-## Use the library
+### Library
 
 ```python
 from jev_ultrafast import Agent
@@ -81,62 +83,35 @@ with Agent(
         print(state["elapsed_ms"], state["status"])
 ```
 
-Run with `uv run --env-file .env python your_script.py`. The same policy can run a different task:
-
 ```bash
 uv run --env-file .env python examples/run.py \
-  --url https://en.wikipedia.org/wiki/Main_Page \
-  --goal 'Find and open the Wikipedia article about Gödel’s incompleteness theorems.'
+  --url https://study.design-bakery.com \
+  --goal 'Continue as guest if offered. Explore a DSA or Big-O lesson. Stop when a worked example is visible.'
 ```
 
-`uv run --env-file .env python examples/flights.py --keep-open` performs the flight search, checks the actual route/date/results, and saves its trace. It does not select or book a flight.
+### Environment
 
-## Why it moves
+| Variable | Role |
+| --- | --- |
+| `OPENROUTER_API_KEY` | Required for Decisions |
+| `OPENROUTER_DECISIONS_URL` | Default `https://openrouter.ai/api/alpha/decisions` |
+| `OPENROUTER_MODEL` | Default `typesafe/jev-1.13` |
+| `TEXT_MODEL_API_KEY` / `TEXT_MODEL_BASE_URL` / `TEXT_MODEL` | Required only for `TYPE_TEXT` (example uses OpenRouter chat + `inception/mercury-2.5`) |
 
-- **One request per decision cycle.** Operation and target heads share the same observed state.
-- **No screenshots in the default agent loop.** Jev consumes structured state. The inspector opts into screenshots; the video uses a separate continuous screencast.
-- **One browser call per snapshot.** Read visible controls, their names, values, and text atomically. Keep references to the actual DOM nodes.
-- **Validate the selected target.** Clicks check the document, form values, target, and nearby context. Animation alone does not force another prediction. Resolve current geometry and reject covered controls before input.
-- **Wait for useful state.** After typing into a combobox, wait for visible suggestions, capped at 200 ms. Other interactions get at most two animation frames or 50 ms. These reads happen after execution is logged.
-- **Keep hidden tabs rendering.** Focus emulation prevents background animation throttling without switching Chrome's visible tab.
-- **Send visible text.** Offscreen article bodies and footers do not fill the model context.
-- **Reuse an interrupted text request.** A generated value survives a stale-page retry only if the entire text-helper input is unchanged.
-
-Every executed target is resolved from an observed node. The executor rechecks page freshness and click occlusion. Model output never becomes selectors, coordinates, shell commands, or executable JavaScript. Text-helper output must parse as a small JSON object before typing.
-
-## Small enough to read
+### Small enough to read
 
 | File | Job |
 | --- | --- |
-| [agent.py](jev_ultrafast/agent.py) | The complete loop and text-helper handoff |
-| [snapshot.js](jev_ultrafast/snapshot.js) | Atomic DOM snapshot, indexed controls, freshness guards |
-| [browser.py](jev_ultrafast/browser.py) | Browser connection, current geometry, execution |
-| [model.py](jev_ultrafast/model.py) | Dynamic operation/target heads and text generation |
-| [questions.py](jev_ultrafast/questions.py) | Model instructions |
+| [agent.py](jev_ultrafast/agent.py) | Loop and text-helper handoff |
+| [snapshot.js](jev_ultrafast/snapshot.js) | Atomic DOM snapshot and freshness guards |
+| [browser.py](jev_ultrafast/browser.py) | Connection, geometry, execution |
+| [model.py](jev_ultrafast/model.py) | Decisions heads and text generation |
 | [demo.py](jev_ultrafast/demo.py) | Local inspector |
 
-## Evidence and limits
+### Adopter policy
 
-The current video is a **7,073 ms** Google Flights run. Timing starts after initial page observation and includes model calls, generated text, browser work, stale decisions, and loading waits. A fresh independent check verifies the one-way setting, Zürich, London, September 20, 2026, and visible flight options. The video plays at 1×, with no opening hold and a 0.5-second final hold.
+See [docs/POLICY.md](docs/POLICY.md): adopters consume crawls/reports; this fork owns Decisions wiring, harness/CDP, and Ultrafast code. Defect contract for Study-os lives in Study-os docs (PDD + `ux-defect-report.v1.json`).
 
-In six alternating runs with identical models and settings, both versions passed **3/3**. Median task time went from **9.450 s → 7.092 s**, a **25% reduction**; median browser protocol calls went from **1,092 → 101**. This is three repeats of one task on one browser profile, not a general reliability benchmark.
+### Scan test
 
-The same policy opened the requested Wikipedia article in **2.798 s** and passed a local hotel search/filter task in **1.896 s**. Runs, failures, source hashes, and measurement boundaries are in [performance.md](docs/performance.md).
-
-A `DONE` choice still requires independent outcome verification. The DOM reader handles common HTML and ARIA controls, not the full accessible-name specification. Shadow roots, frames, canvas, uploads, pop-up tabs, nested scrolling, and arbitrary keyboard widgets remain outside this MVP. Owned tabs share the existing Chrome profile.
-
-## Development
-
-```bash
-uv run ruff check .
-uv run pytest
-node --check jev_ultrafast/static/app.js
-node --check jev_ultrafast/snapshot.js
-uv build
-```
-
-Tests are offline. `uv run python scripts/check_guards.py` checks real controls in a local browser without model calls. Live examples and recording scripts make paid API calls. `scripts/record_flights.py <new-folder>` captures original browser timestamps; `scripts/render_demo.py <recording-folder>` renders that verified run at 1× and crops out the Google account strip. Credentials and raw traces stay ignored.
-
----
-
-[Browser Use](https://github.com/browser-use/browser-use) · [Browser Harness](https://github.com/browser-use/browser-harness) · [TypeSafe speculative fan-out](https://docs.typesafe.ai/patterns/fan-out)
+Headings, bold phrases, and links should recover: problem (no invented selectors), promise (indexed controls + one Decisions request), mechanism (observe → decide → act), boundaries (no TypeSafe key / no booking), next action (`uv run jev`).

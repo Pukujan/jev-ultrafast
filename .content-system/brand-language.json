@@ -1,0 +1,27 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "Jev Ultrafast",
+  "personality": [
+    "clear",
+    "specific",
+    "fast",
+    "evidence-bound"
+  ],
+  "audience_feeling": "Able to run a real-web goal without inventing site scripts",
+  "promise": "One goal, indexed controls, one Decisions request per cycle",
+  "preferred_terms": {
+    "Decisions": "OpenRouter Decisions API choice/noul/score answers",
+    "element table": "Indexed observed controls offered to the model"
+  },
+  "avoid": [
+    "TypeSafe key required",
+    "magic autonomy",
+    "unverifiable speed claims"
+  ],
+  "good_examples": [
+    "Give it one goal. Decisions picks an operation and an element. A small LLM writes text only for TYPE_TEXT."
+  ],
+  "bad_examples": [
+    "Just paste your TypeSafe key and watch it write Playwright for any site."
+  ]
+}

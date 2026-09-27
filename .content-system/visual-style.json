@@ -1,0 +1,52 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "docs/flights-result.png",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "problem",
+    "supporting",
+    "evidence",
+    "story",
+    "social"
+  ],
+  "palette": {
+    "background": "#0B1020",
+    "primary": "#4F8CFF",
+    "accent": "#7CFFB2",
+    "warm_accent": "#FFB86B",
+    "text": "#F5F7FF"
+  },
+  "subjects": [
+    "browser inspector with numbered controls",
+    "flight search result strip"
+  ],
+  "composition": [
+    "one dominant idea",
+    "main subjects remain visible"
+  ],
+  "text_policy": "narrative raster assets carry one short title plus one short subtitle; icons, SVGs, logos, and tiny helper graphics remain text-free",
+  "roles": {
+    "hero": {
+      "orientation": "wide",
+      "dimensions": "1600x900"
+    },
+    "problem": {
+      "orientation": "wide",
+      "dimensions": "1600x900"
+    },
+    "system": {
+      "orientation": "square",
+      "dimensions": "1024x1024"
+    },
+    "evidence": {
+      "orientation": "portrait",
+      "dimensions": "1080x1350"
+    }
+  },
+  "reject_when": [
+    "illegible UI chrome",
+    "fake metrics overlays",
+    "secrets visible"
+  ]
+}

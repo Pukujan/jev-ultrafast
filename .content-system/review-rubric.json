@@ -1,0 +1,36 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {
+      "id": "human_comprehension",
+      "question": "Can a first-time reader explain Ultrafast after twenty seconds?",
+      "weight": 2
+    },
+    {
+      "id": "specificity",
+      "question": "Does the output use concrete situations, mechanisms, and evidence?",
+      "weight": 2
+    },
+    {
+      "id": "claim_safety",
+      "question": "Are current claims supported by repository evidence?",
+      "weight": 3
+    },
+    {
+      "id": "skimmability",
+      "question": "Can a reader skim headings, emphasis, and first sentences successfully?",
+      "weight": 1
+    },
+    {
+      "id": "visual_clarity",
+      "question": "Does the image or demo have one clear visual idea without covering the main subject?",
+      "weight": 2
+    },
+    {
+      "id": "responsive_fit",
+      "question": "Does the output remain useful at its declared device sizes?",
+      "weight": 1
+    }
+  ],
+  "decision_rule": "Accept only when claim_safety passes and no weighted dimension is below 3/5; human review can override model scores with a recorded reason."
+}

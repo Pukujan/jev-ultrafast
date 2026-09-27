@@ -1,4 +1,4 @@
-"""TypeSafe makes choices; an optional small OpenAI-compatible model writes field values."""
+"""OpenRouter Decisions makes choices; an optional small OpenAI-compatible model writes field values."""
 
 import json
 import math
@@ -105,7 +105,10 @@ def choose(state, goal, history):
             "instructions": {"goal": goal, "operation": operation, "rules": [NEXT_ACTION, TARGET]},
         }
     body = {
-        "model": os.environ.get("TYPESAFE_MODEL", "jev-latest"),
+        "model": os.environ.get(
+            "OPENROUTER_MODEL",
+            os.environ.get("TYPESAFE_MODEL", "typesafe/jev-1.13"),
+        ),
         "state": {
             "page": {k: state[k] for k in ("url", "title", "text")},
             "elements": elements,
@@ -116,7 +119,14 @@ def choose(state, goal, history):
         "questions": questions,
     }
     started = time.perf_counter()
-    result = post_json("https://api.typesafe.ai/v1/systemone", os.environ["TYPESAFE_API_KEY"], body)
+    # OpenRouter Decisions API (OpenRouter key only; no TypeSafe account required).
+    decisions_url = os.environ.get(
+        "OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions"
+    )
+    api_key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("TYPESAFE_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY is required for Decisions; nothing executed.")
+    result = post_json(decisions_url, api_key, body)
     operation_answer = validate_choice(result["answers"].get("operation", {}), operations)
     operation = operation_answer["choice"]
     target = None
