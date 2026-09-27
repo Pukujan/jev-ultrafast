@@ -95,7 +95,7 @@ uv run --env-file .env python examples/run.py \
 | --- | --- |
 | `OPENROUTER_API_KEY` | Required for Decisions |
 | `OPENROUTER_DECISIONS_URL` | Default `https://openrouter.ai/api/alpha/decisions` |
-| `OPENROUTER_MODEL` | Default `typesafe/jev-1.13` |
+| `OPENROUTER_MODEL` | OpenRouter Decisions model **slug** (default `typesafe/jev-1.13`). Not a separate provider; does not bypass OpenRouter Decisions. |
 | `TEXT_MODEL_API_KEY` / `TEXT_MODEL_BASE_URL` / `TEXT_MODEL` | Required only for `TYPE_TEXT` (example uses OpenRouter chat + `inception/mercury-2.5`) |
 
 ### Small enough to read

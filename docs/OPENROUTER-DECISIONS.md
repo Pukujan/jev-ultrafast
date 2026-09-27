@@ -8,7 +8,7 @@ Alex clarified: **no TypeSafe key**. Use the OpenRouter Decisions API with `OPEN
 | --- | --- |
 | URL | `POST https://openrouter.ai/api/alpha/decisions` |
 | Auth | `Authorization: Bearer $OPENROUTER_API_KEY` |
-| Model | `typesafe/jev-1.13` (alias `~typesafe/jev-latest` is rolling) |
+| Model (OpenRouter slug) | `typesafe/jev-1.13` (alias `~typesafe/jev-latest` is rolling). Slug only — not a separate provider. |
 | Docs | [Jev hub](https://openrouter.ai/docs/guides/community/jev), [Decisions reference](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), [tutorial](https://openrouter.ai/docs/guides/community/jev-tutorial) |
 
 **Not** Chat Completions. Jev returns typed answers (choice / noul / score), not prose.
@@ -68,10 +68,23 @@ Alternate OpenRouter surface (not used by this patch): `POST https://openrouter.
 In `choose()`, replace the hardcoded TypeSafe System One call with Decisions + OpenRouter key:
 
 - Default URL: `https://openrouter.ai/api/alpha/decisions` (`OPENROUTER_DECISIONS_URL` override)
-- Key: `OPENROUTER_API_KEY` (falls back to `TYPESAFE_API_KEY` only if somehow present)
-- Default model: `typesafe/jev-1.13` (`OPENROUTER_MODEL` or legacy `TYPESAFE_MODEL`)
+- Key: `OPENROUTER_API_KEY` only (no `TYPESAFE_API_KEY` fallback)
+- Default model slug: `typesafe/jev-1.13` via `OPENROUTER_MODEL` (legacy alias `TYPESAFE_MODEL` sets the same OpenRouter slug only)
 
 `field_text()` is unchanged: still uses `TEXT_MODEL_*` OpenAI-compatible chat for TYPE_TEXT only (example already points at OpenRouter chat).
+
+
+## 2b. What `OPENROUTER_MODEL=typesafe/jev-1.13` means
+
+It is an **OpenRouter model slug**, not a separate decision backend.
+
+| Misreading | Actual behavior on this fork |
+| --- | --- |
+| "typesafe/… means call TypeSafe System One / use a TypeSafe account" | False. `choose()` always `POST`s `OPENROUTER_DECISIONS_URL` (default `https://openrouter.ai/api/alpha/decisions`) with `Authorization: Bearer $OPENROUTER_API_KEY`. |
+| "Setting OPENROUTER_MODEL switches provider" | False. The value is only the `model` field in the Decisions JSON body. |
+| "Response `provider: TypeSafe` means we bypassed OpenRouter" | False. OpenRouter may route the slug to TypeSafe infrastructure; auth and HTTP path stay OpenRouter Decisions. |
+
+Gates/DGM runs that set `OPENROUTER_MODEL=typesafe/jev-1.13` are still on the OpenRouter Decisions path. To change the slug, keep the same env var; do not introduce a TypeSafe key or System One URL.
 
 ## 3. Env vars
 

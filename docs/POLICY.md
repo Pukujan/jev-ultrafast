@@ -13,12 +13,12 @@ Adopters **use** Ultrafast for crawls and defect reports. They do **not** own fo
 
 ## OpenRouter Decisions (only)
 
-- Endpoint: `POST https://openrouter.ai/api/alpha/decisions`
-- Auth: `OPENROUTER_API_KEY` (server-side / env; never commit keys)
-- Model: `typesafe/jev-1.13`
+- Endpoint: `POST https://openrouter.ai/api/alpha/decisions` — always the primary (and only supported) decision path
+- Auth: `OPENROUTER_API_KEY` (server-side / env; never commit keys). No `TYPESAFE_API_KEY`.
+- Model: `OPENROUTER_MODEL` defaults to `typesafe/jev-1.13`. That value is an **OpenRouter model slug** in the Decisions body, not a TypeSafe-account or System One backend switch.
 - **No TypeSafe key required.** Decisions via OpenRouter is the supported path.
 
-See also `docs/OPENROUTER-DECISIONS.md` if present for request/response details.
+See `docs/OPENROUTER-DECISIONS.md` (§2b) for how `OPENROUTER_MODEL` works.
 
 ## Study-os live target & defect contract
 

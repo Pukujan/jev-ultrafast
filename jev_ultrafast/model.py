@@ -41,7 +41,7 @@ def validate_choice(answer, ids):
     except (KeyError, TypeError, ValueError):
         valid = False
     if not valid:
-        raise ValueError("Invalid TypeSafe response; no action executed.")
+        raise ValueError("Invalid Decisions response; no action executed.")
     return answer
 
 
@@ -119,11 +119,13 @@ def choose(state, goal, history):
         "questions": questions,
     }
     started = time.perf_counter()
-    # OpenRouter Decisions API (OpenRouter key only; no TypeSafe account required).
+    # Always OpenRouter Decisions first. Auth is OPENROUTER_API_KEY only.
+    # OPENROUTER_MODEL is the OpenRouter model slug in the Decisions body
+    # (e.g. typesafe/jev-1.13) — not a separate provider or TypeSafe-account path.
     decisions_url = os.environ.get(
         "OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions"
     )
-    api_key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("TYPESAFE_API_KEY")
+    api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY is required for Decisions; nothing executed.")
     result = post_json(decisions_url, api_key, body)
