@@ -1,0 +1,233 @@
+{
+  "status": "partial",
+  "duration_s": 36.42,
+  "actions": 75,
+  "decisions": 103,
+  "openrouter_decisions_ok": true,
+  "pages_visited": [
+    "https://study.design-bakery.com/",
+    "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+    "https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c",
+    "https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae09945d"
+  ],
+  "unique_pages": 4,
+  "buttons_clicked_count": 75,
+  "unique_buttons": [
+    "1 Ready",
+    "1 Why",
+    "Ask the tutor",
+    "Back",
+    "Collapse",
+    "Continue",
+    "Explain again",
+    "Message",
+    "Open Message",
+    "Open Your answer",
+    "Open study assistant",
+    "Rate 1 out of 5",
+    "Read aloud",
+    "Resume",
+    "Save progress",
+    "Send",
+    "Show a worked example",
+    "Start",
+    "Study OS",
+    "Voice input",
+    "Worked example"
+  ],
+  "defect_count": 11,
+  "defects": [
+    {
+      "id": "D004",
+      "severity": "P0",
+      "title": "Dead/no-op control: Worked example",
+      "repro": "On https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c, click/activate 'Worked example' and wait ~3s",
+      "expected": "Visible change (URL, DOM text, panel, toast) within ~3s",
+      "actual": "No URL/text/fingerprint change after action",
+      "url": "https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c",
+      "ts": "2026-09-27T05:50:04.650687+00:00",
+      "control": "Worked example",
+      "kind": "click"
+    },
+    {
+      "id": "D002",
+      "severity": "P1",
+      "title": "Missing Back/exit control on play surface",
+      "repro": "Enter lesson player at https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c and inspect visible actions",
+      "expected": "Visible Back/Exit/Home control to leave lesson",
+      "actual": "No back/exit/home among 15 actions: ['study os', 'save progress', 'sign out', '1 why', 'explain again', 'worked example', 'your answer', 'open your answer', 'read aloud', 'voice input', 'i’m confused', 'ask the tutor', 'open study assistant', 'scroll down', 'wait for the page to update']",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:49:58.063561+00:00"
+    },
+    {
+      "id": "D005",
+      "severity": "P1",
+      "title": "Dead/no-op control: Read aloud",
+      "repro": "On https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c, click/activate 'Read aloud' and wait ~3s",
+      "expected": "Visible change (URL, DOM text, panel, toast) within ~3s",
+      "actual": "No URL/text/fingerprint change after action",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:50:08.319265+00:00",
+      "control": "Read aloud",
+      "kind": "click"
+    },
+    {
+      "id": "D006",
+      "severity": "P1",
+      "title": "Dead/no-op control: Open Message",
+      "repro": "On https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c, click/activate 'Open Message' and wait ~3s",
+      "expected": "Visible change (URL, DOM text, panel, toast) within ~3s",
+      "actual": "No URL/text/fingerprint change after action",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:50:10.319172+00:00",
+      "control": "Open Message",
+      "kind": "click"
+    },
+    {
+      "id": "D007",
+      "severity": "P1",
+      "title": "Missing Back/exit control on play surface",
+      "repro": "Enter lesson player at https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c and inspect visible actions",
+      "expected": "Visible Back/Exit/Home control to leave lesson",
+      "actual": "No back/exit/home among 16 actions: ['study os', 'save progress', 'sign out', '1 why', 'read aloud', 'voice input', 'collapse', 'show a worked example', 'explain again', 'message', 'open message', 'voice input', 'turn on read aloud', 'open study assistant', 'scroll down', 'wait for the page to update']",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:50:10.655583+00:00"
+    },
+    {
+      "id": "D008",
+      "severity": "P1",
+      "title": "Dead/no-op control: Voice input",
+      "repro": "On https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae09945d, click/activate 'Voice input' and wait ~3s",
+      "expected": "Visible change (URL, DOM text, panel, toast) within ~3s",
+      "actual": "No URL/text/fingerprint change after action",
+      "url": "https://study.design-bakery.com/play/e5ef7961-fa11-4dd3-93c9-037cae09945d",
+      "ts": "2026-09-27T05:50:14.982111+00:00",
+      "control": "Voice input",
+      "kind": "click"
+    },
+    {
+      "id": "D009",
+      "severity": "P1",
+      "title": "Dead/no-op control: Voice input",
+      "repro": "On https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c, click/activate 'Voice input' and wait ~3s",
+      "expected": "Visible change (URL, DOM text, panel, toast) within ~3s",
+      "actual": "No URL/text/fingerprint change after action",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:50:20.439130+00:00",
+      "control": "Voice input",
+      "kind": "click"
+    },
+    {
+      "id": "D010",
+      "severity": "P1",
+      "title": "Missing Back/exit control on play surface",
+      "repro": "Enter lesson player at https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c and inspect visible actions",
+      "expected": "Visible Back/Exit/Home control to leave lesson",
+      "actual": "No back/exit/home among 22 actions: ['study os', 'save progress', 'sign out', '1 why', 'explain again', 'worked example', 'your answer', 'open your answer', 'read aloud', 'voice input', 'i’m confused', 'ask the tutor', 'collapse', 'show a worked example', 'explain again', 'message', 'open message', 'voice input', 'turn on read aloud', 'open study assistant']",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:50:23.244211+00:00"
+    },
+    {
+      "id": "D011",
+      "severity": "P1",
+      "title": "Dead/no-op control: Open Your answer",
+      "repro": "On https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c, click/activate 'Open Your answer' and wait ~3s",
+      "expected": "Visible change (URL, DOM text, panel, toast) within ~3s",
+      "actual": "No URL/text/fingerprint change after action",
+      "url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+      "ts": "2026-09-27T05:50:29.938325+00:00",
+      "control": "Open Your answer",
+      "kind": "click"
+    },
+    {
+      "id": "D001",
+      "severity": "P2",
+      "title": "Harness screenshot IPC timeout during guest explore",
+      "repro": "Run Agent with record_dir/screenshots enabled on Windows",
+      "expected": "Screenshots capture without killing the agent loop",
+      "actual": "_IPCResponseTimeout: Page.captureScreenshot timed out after 5s waiting for the daemon",
+      "url": "https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c",
+      "ts": "2026-09-27T05:49:54.409169+00:00"
+    },
+    {
+      "id": "D003",
+      "severity": "P2",
+      "title": "Possible teach/probe answer co-visibility (spoil risk)",
+      "repro": "Open fractions (or similar) probe step with teach controls visible",
+      "expected": "Probe should not display the correct answer before submission",
+      "actual": "Answer-like fraction text visible alongside probe question",
+      "url": "https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c",
+      "ts": "2026-09-27T05:50:00.180893+00:00"
+    }
+  ],
+  "phases": [
+    {
+      "prior_summary": "D:\\claude\\jev-ultrafast\\artifacts\\study-os-guest\\20260927-014415\\summary.json",
+      "data": {
+        "status": "ready",
+        "actions": 1,
+        "final_url": "https://study.design-bakery.com/play/62028e19-2ae4-4801-99d9-35e1701a697c",
+        "error": "_IPCResponseTimeout: Page.captureScreenshot timed out after 5s waiting for the daemon",
+        "lesson_ui_appeared": true
+      }
+    },
+    {
+      "prior_summary": "D:\\claude\\jev-ultrafast\\artifacts\\study-os-guest\\20260927-014622\\summary.json",
+      "data": {
+        "status": "done",
+        "actions": 2,
+        "final_url": "https://study.design-bakery.com/play/3c43a3d4-97c6-4648-ba48-64a38bb2fa3c",
+        "error": null,
+        "lesson_ui_appeared": true
+      }
+    },
+    {
+      "phase": "home_and_lanes",
+      "status": "ready",
+      "phase_actions": 6,
+      "elapsed_s": 3.65
+    },
+    {
+      "phase": "hesi_fractions_lesson",
+      "status": "done",
+      "phase_actions": 13,
+      "elapsed_s": 7.49
+    },
+    {
+      "phase": "dsa_big_o_lesson",
+      "status": "blocked",
+      "phase_actions": 10,
+      "elapsed_s": 4.1
+    },
+    {
+      "phase": "sliding_window_and_misc",
+      "status": "blocked",
+      "phase_actions": 30,
+      "elapsed_s": 12.09
+    },
+    {
+      "phase": "controls_sweep",
+      "status": "blocked",
+      "phase_actions": 16,
+      "elapsed_s": 6.55
+    }
+  ],
+  "errors": [
+    "home_and_lanes: ValueError: Invalid TypeSafe response; no action executed."
+  ],
+  "action_cap": 140,
+  "artifact_dir": "D:\\claude\\jev-ultrafast\\artifacts\\study-os-full-crawl\\20260927-054810",
+  "known_suspects_checked": [
+    "blank play/Resume",
+    "missing Back/exit",
+    "Explain again / Worked example dead",
+    "speaker/mic no-op",
+    "teach spoils probe",
+    "arrow overlap",
+    "review only once",
+    "chat no ack",
+    "number-line before probe",
+    "companion chips"
+  ],
+  "ts_utc": "2026-09-27T05:50:30.804972+00:00"
+}
