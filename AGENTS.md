@@ -13,6 +13,28 @@ Read README.md, PROJECT.md, and checkpoints/CURRENT.md before editing. Keep the 
 - Keep examples, README claims, raw evidence, and model-call counts consistent.
 - Work on a branch; open a PR to `main`. Do not push directly to `main`.
 
+## CGM writing rule (always-on)
+
+Pinned helper: content-generation-modules **0.5.7** @ `c069613ca8b3e02bcf5aba1960160583537f8a3a`. Load writing routes from that checkout's `docs/WRITING_ROUTING.md` / `docs/writing-routing.json`; ACS verify: `docs/ACS_VERIFY.md`. Do not cite CGM in README.
+
+```
+CGM ALWAYS-ON WRITING RULE (every adopter that pins this helper)
+
+Before you write ANY human-facing output — including HTML reports, compare HTML/UIs, appendable HTML, PR/issue/commit prose, docs, posts, papers, or other readable artifacts — you MUST load and apply modules/human-sounding-writing/SKILL.md (hsw).
+
+This rule is always on. Opt-in is forbidden. Do not wait for a per-task, per-report, or per-HTML flag.
+
+Exceptions (only these):
+- README.md / product entry pages → load modules/writing-direction/SKILL.md instead
+- Generated artifact filenames / asset-manifest paths / media basenames / filename legends → load modules/human-output-naming/SKILL.md (hon) for basenames; visible prose inside HTML still uses hsw
+
+HTML reports, compare HTML, and compare UIs have NO skip path. An exception reason is not allowed for those surfaces.
+
+If you cannot load the skill file from the pinned CGM checkout, stop and report that — do not draft jargon-heavy or tool-dump HTML instead.
+
+Filenames: use scripts/human_filename (speakable basenames; optional safe_twin) and keep a per-feature legend. Hash may stay a separate manifest field.
+```
+
 ## Policy
 
 Full rules: [docs/POLICY.md](docs/POLICY.md).
