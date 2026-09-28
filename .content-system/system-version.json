@@ -1,13 +1,15 @@
 {
   "schema_version": "content-generation.adapter.v1",
   "helper_repository": "https://github.com/Pukujan/content-generation-modules",
-  "helper_version": "0.5.4",
-  "helper_commit": "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e",
+  "helper_version": "0.5.7",
+  "helper_commit": "c069613ca8b3e02bcf5aba1960160583537f8a3a",
+  "helper_pin_note": "Full CGM 0.5.7 (eight modules including human-output-naming) plus always-on HSW inject in AGENTS.md from docs/writing-routing.json acs_prompt_inject.system_block.",
   "modules": [
     "brand-foundation",
     "content-context",
     "writing-direction",
     "human-sounding-writing",
+    "human-output-naming",
     "visual-direction",
     "image-generation",
     "html-demo"
