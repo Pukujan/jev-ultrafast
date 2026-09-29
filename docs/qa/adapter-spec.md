@@ -87,6 +87,12 @@ call time and calls it with exactly three positional args
 working; and the `"OPENROUTER_API_KEY is required..."` error string stays
 byte-identical for existing callers.
 
+Export pin: `model.py` must keep exporting `post_json`, `validate_choice`,
+`action_space`, `choose`, `field_context`, `field_text` with unchanged call
+signatures — `jev_ultrafast/agent.py:8` imports four of those names at module
+import time and `tests/test_agent.py` monkeypatches `model.post_json` and
+`loop.field_text`; any rename or move breaks the suite at import.
+
 ### Laya dialect
 
 Source of truth: `/tmp/laya-browser-agent` @ main (2026-09-29), `localdecide/serve.py`
@@ -98,17 +104,24 @@ and `localdecide/page.py`.
   is `{choice, probabilities, confidence}`, the same shape
   `validate_choice()` enforces.
 - No auth header. Laya binds 127.0.0.1 and needs no keys.
-- Criteria flattening is deliberate. Laya's own question builder emits
-  compact string criteria (`{index: element.describe()}`, page.py:76:
-  `[3] Where to? (combobox) = ''`), and its prompt uses the criteria values
-  directly. `choose()` emits dict criteria for target questions.
-  `LayaTransport.prepare()` therefore rewrites every dict criterion to the
+- Criteria flattening is the documented choice. Laya's own question builder
+  emits compact string criteria (`{index: element.describe()}`, page.py:76:
+  `[3] Where to? (combobox) = ''`), and its prompt consumes the criteria
+  values directly; `choose()` emits dict criteria for target questions.
+  `LayaTransport.prepare()` rewrites every dict criterion to the
   describe-style line (`[idx] label (role) = 'value' checked=true ...`) and
-  passes the operation question's flat strings through unchanged. Keys are
-  preserved, so response validation and target→action mapping are
-  untouched. `prepare()` is a pure documented function pinned by unit
-  tests; run.json provenance records `laya_criteria_flattening:
-  "describe-v1"` rather than duplicating bodies per event.
+  passes flat string criteria through unchanged. Keys are preserved, so
+  response validation and target→action mapping are untouched.
+  Measured 2026-09-29 on the live laya-mlx checkpoint (localdecide @ main,
+  three alternating warm trials): dict-form and flattened bodies both pass
+  `validate_choice` with the identical pick (CLICK, target 1), so dict
+  criteria are NOT known to confuse the runtime; flattening stays for
+  prompt-format parity with Laya's own builder. Warm latencies 233–240 ms
+  (flattened) vs 254–266 ms (dict) are a small, not-fully-attributed
+  difference on one state, not a benchmark claim. The first-call gap
+  (1288 vs 307 ms) was cold model load and is not attributable.
+  `prepare()` is a pure function pinned by unit-test goldens; run.json
+  provenance records `laya_criteria_flattening: "describe-v1"`.
 
 Discovery and fail-closed (`laya.py`):
 
@@ -205,8 +218,13 @@ list and final page:
 - navigate with a fixed viewport (1280×720 default, recorded); capture
   Navigation Timing (`loadEventEnd - navigationStart`), console messages,
   page errors
-- fetch/HEAD every `<a href>` on visited pages once; non-2xx/3xx becomes a
-  `broken_link` confirmed finding with the status code as evidence
+- probe every `<a href>` on visited pages once, with a GET through the
+  Playwright request context (shared UA/cookies), never a bare HEAD:
+  HEAD answers 405/403/429 from CDNs and bot walls on working links.
+  `confirmed` broken_link requires 404/410 or a browser-visible error
+  page in the navigated response; 401/403/405/429 and bot-challenge
+  bodies are recorded `candidate` with the status as evidence;
+  network-level failures (DNS/refused) are confirmed
 - layout scan in-page: elements whose box overflows the viewport or whose
   scrollWidth exceeds clientWidth beyond a 1px tolerance → `layout` findings
   with bbox evidence
