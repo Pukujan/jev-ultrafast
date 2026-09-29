@@ -198,8 +198,8 @@ def playwright_stage_status(context: RunContext) -> str:
     if not context.config.playwright:
         return "skipped"
     marker = context.provenance.get("playwright_stage")
-    if marker == "failed-setup":
-        return "failed-setup"
+    if marker in ("failed-setup", "failed"):
+        return marker
     if marker == "on":
         return "on"
     # No marker means the stage never recorded a result. Never claim it ran.

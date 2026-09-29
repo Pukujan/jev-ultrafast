@@ -473,6 +473,16 @@ def test_unopenable_target_is_setup_failure_not_a_defect(fake, capsys, tmp_path)
     out = capsys.readouterr().out
     assert "Could not open" in out
     assert "injected open failure" in out
-    assert "artifacts.write_events" not in fake.names
+    # A failed run is a recorded run: every evidence writer runs, the report never does.
+    for name in (
+        "artifacts.write_events",
+        "artifacts.write_workflow",
+        "artifacts.write_defects",
+        "artifacts.write_run",
+    ):
+        assert name in fake.names
     assert "report.build_report" not in fake.names
-    assert fake.explorers[0].context.findings == []
+    context = fake.explorers[0].context
+    assert context.provenance["run_error"].startswith("browser setup failed:")
+    assert "injected open failure" in context.provenance["run_error"]
+    assert context.findings == []

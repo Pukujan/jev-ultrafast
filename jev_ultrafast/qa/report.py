@@ -40,6 +40,7 @@ _PLAYWRIGHT_LINES = {
     "on": "playwright evidence recorded",
     "skipped": "playwright skipped for this run",
     "failed-setup": "playwright setup failed, so browser evidence is missing",
+    "failed": "playwright evidence stopped partway, so browser evidence is incomplete",
     "not-run": "the run stopped before the evidence stage",
 }
 

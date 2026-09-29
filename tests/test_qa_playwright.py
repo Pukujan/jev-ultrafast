@@ -27,7 +27,7 @@ class FakePage:
     def __init__(self, scenario):
         self.scenario = scenario
         self.handlers = {}
-        self.title = ""
+        self._title = ""
         self.goto_calls = []
         self.shot_count = 0
         self.closed = False
@@ -41,7 +41,7 @@ class FakePage:
         if info is None:
             raise RuntimeError(f"net::ERR_NAME_NOT_RESOLVED at {url}")
         self.url = url
-        self.title = info.get("title", "")
+        self._title = info.get("title", "")
         for message in info.get("console", []):
             for handler in self.handlers.get("console", []):
                 handler(message)
@@ -49,6 +49,10 @@ class FakePage:
             for handler in self.handlers.get("pageerror", []):
                 handler(error)
         return FakeNavResponse(info.get("status", 200))
+
+    def title(self):
+        """Real Playwright exposes title() as a method; a bare attribute hid a shipped bug."""
+        return self._title
 
     def evaluate(self, expression):
         info = self.scenario["pages"][self.url]
@@ -331,6 +335,28 @@ def test_config_skip_writes_nothing_stage_side(tmp_path, monkeypatch):
     assert "playwright_stage" not in context.provenance  # the CLI owns the skipped marker
     assert context.findings == []
     assert playwright.chromium.launch_kwargs is None  # never launched
+
+
+def test_runtime_fault_is_failed_not_failed_setup(tmp_path, monkeypatch):
+    install_fake_playwright(monkeypatch, big_scenario())
+
+    def exploded(self, context):
+        raise RuntimeError("'function' object has no attribute 'lower'")
+
+    monkeypatch.setattr(playwright_stage.PlaywrightStage, "_sweep", exploded)
+    context = make_context(tmp_path, [URL_A])
+    playwright_stage.PlaywrightStage().run(context)  # must not raise
+    assert context.provenance["playwright_stage"] == "failed"
+    assert "lower" in context.provenance["playwright_error"]
+    assert context.findings == []
+
+
+def test_setup_and_runtime_faults_classify_by_origin():
+    assert playwright_stage._is_setup_failure(ImportError("no module named playwright"))
+    assert playwright_stage._is_setup_failure(RuntimeError("Executable doesn't exist at C:/x/chrome.exe"))
+    assert playwright_stage._is_setup_failure(RuntimeError("please run `playwright install`"))
+    assert not playwright_stage._is_setup_failure(RuntimeError("'function' object has no attribute 'lower'"))
+    assert not playwright_stage._is_setup_failure(RuntimeError("browser has been closed"))
 
 
 def test_visited_urls_dedupe_keep_order_and_cap():

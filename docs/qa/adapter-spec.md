@@ -180,7 +180,10 @@ thread is out. The mechanism is a detached child plus a state file:
   `keywatch.json` (`os.O_CREAT|os.O_EXCL` lockfile with pid + staleness
   takeover after 60s). On start, the CLI first reconciles: expired inserts
   are removed with the same guard, a missing/dead watcher is respawned, a
-  live one is not duplicated.
+  live one is not duplicated. Liveness asks the OS: `os.kill(pid, 0)` on
+  POSIX; on Windows, `OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION)` plus
+  `GetExitCodeProcess == STILL_ACTIVE`, because signal 0 raises WinError 87
+  for every pid there and would misread a live watcher as unreadable.
 - The state file lives under the ignored `qa-runs/` root and is never
   copied into a run folder, receipt, or the target project.
 - Fake-clock unit tests cover: expiry deletes exact-line only, use
@@ -239,6 +242,9 @@ list and final page:
 Browser binaries may be missing (`playwright install` not run). The stage
 then writes a failed-setup status into run.json, adds no findings, and the
 run still completes with explorer evidence. Never pretend the stage ran.
+A fatal mid-sweep fault — a browser exists but the sweep raises — writes
+`failed` with the error text in provenance instead, so a code bug is never
+reported as an environment problem the operator could reinstall away.
 
 ## Vision stage (`vision_stage.py`)
 
@@ -281,7 +287,7 @@ Opt-in, default off, suggestions only.
 - `run.json`: run_id, started/finished ISO times, target, runner, provider
   or null, model/backend from the decision transport (laya: healthz
   `backend`, model name; never any key), stage table
-  {playwright: on | skipped | failed-setup | not-run, vision: off |
+  {playwright: on | skipped | failed-setup | failed | not-run, vision: off |
   declined | skipped-no-model | ran(N) | not-run}. A stage that never
   recorded a result is not-run, never a claimed on/declined. Then step
   and finding counts by status, run_error text on crash paths, renderer
@@ -291,7 +297,11 @@ Opt-in, default off, suggestions only.
 Crash path: if the run raises mid-flight, the CLI still writes events,
 workflow, defects, and run.json (best effort) with `run_error`, then
 exits 1 without building or opening report.html. A failed run is a
-recorded run, never a silent folder.
+recorded run, never a silent folder. A browser setup failure obeys the
+same rule: when the target never opened, the CLI writes those four
+evidence files with a `run_error` naming the open failure, still builds
+no report, and keeps exit code 2 so setup problems stay distinct from
+mid-run crashes.
 
 ## Report (`report.py`)
 

@@ -72,7 +72,7 @@ class FakePage:
     def __init__(self, scenario):
         self.scenario = scenario
         self.handlers = {}
-        self.title = ""
+        self._title = ""
         self.url = None
 
     def on(self, event, handler):
@@ -81,11 +81,15 @@ class FakePage:
     def goto(self, url, wait_until=None, timeout=None):
         info = self.scenario["pages"][url]
         self.url = url
-        self.title = info.get("title", "")
+        self._title = info.get("title", "")
         for kind, text in info.get("console", []):
             for handler in self.handlers.get("console", []):
                 handler(FakeMessage(kind, text))
         return FakeNavResponse(info.get("status", 200))
+
+    def title(self):
+        """Match Playwright's callable title so fuzzing exercises the real API shape."""
+        return self._title
 
     def evaluate(self, expression):
         info = self.scenario["pages"][self.url]
