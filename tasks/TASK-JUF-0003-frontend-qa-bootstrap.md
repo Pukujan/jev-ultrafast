@@ -79,3 +79,26 @@ Blocked/uncertain:
 
 Next:
 - Complete remaining acceptance implementation and run live targets only after required runtime and operator-provided local URL are available
+
+### 2026-09-29 14:12:50-04:00 — Codex, checkpointing Luna worker's committed increment per owner request
+
+<!-- continuity:checkpoint {"agent":"Codex, checkpointing Luna worker's committed increment per owner request","blocked":["The Laya-driven browser exploration loop and live Laya runtime are not ready; Playwright and vision validation are incomplete; no live target or blind hidden holdout was run. Keep issue #9 open."],"changed":["Added frontend QA CLI and provider adapter scaffolding, key cleanup, reports, focused tests, PDD/SDD/TDD, README/policy updates, and current/task/handoff projections."],"completed":["Operators lacked a single URL-based frontend QA entry point. Added the terminal scaffold, URL-only target intake, local Laya default with explicit Jev comparison selection, report outputs, tests, and PDD/SDD/TDD projections."],"decisions":["V1 accepts only a reachable hosted or operator-started localhost URL. Laya local exploration is the default and required path; Jev is a separate selected comparison arm. Playwright is the browser substrate, deterministic assertions support the exploration, and vision is optional and off by default."],"evidence":["Issue #9 is still OPEN and has owner corrections for URL-only scope, Laya default, Jev comparison, and vision research. Focused Ruff passed; 44 tests passed; Node syntax, package build, continuity validation, issue verification, and diff checks passed. Hosted Gemma 3 4B synthetic pilot is weak and not acceptance evidence: 8/8 sensitivity, 0/8 specificity, 2/8 exact categories; paired pilot 8/8 sensitivity, 0/2 specificity, 2/8 exact categories. Local Qwen3.5 2B pull stalled and was stopped."],"next_action":"Complete the Laya-driven Playwright exploration loop and provider/vision adapters, then run independent blind acceptance against Design Bakery and an operator-provided local Study OS URL; keep acceptance open until evidence passes.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JUF-0003","timestamp":"2026-09-29T14:12:50-04:00"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"f46c0ab5fd25e820f21fb1ad2c73959159bb1d7dec5a87fd89ce7c12e8670e6e","request_id":"juf-0003-20260929-7f034ba1","schema":"project-continuity.checkpoint-operation.v1","task_id":"JUF-0003"} -->
+
+Completed:
+- Operators lacked a single URL-based frontend QA entry point. Added the terminal scaffold, URL-only target intake, local Laya default with explicit Jev comparison selection, report outputs, tests, and PDD/SDD/TDD projections.
+
+Evidence:
+- Issue #9 is still OPEN and has owner corrections for URL-only scope, Laya default, Jev comparison, and vision research. Focused Ruff passed; 44 tests passed; Node syntax, package build, continuity validation, issue verification, and diff checks passed. Hosted Gemma 3 4B synthetic pilot is weak and not acceptance evidence: 8/8 sensitivity, 0/8 specificity, 2/8 exact categories; paired pilot 8/8 sensitivity, 0/2 specificity, 2/8 exact categories. Local Qwen3.5 2B pull stalled and was stopped.
+
+Decisions:
+- V1 accepts only a reachable hosted or operator-started localhost URL. Laya local exploration is the default and required path; Jev is a separate selected comparison arm. Playwright is the browser substrate, deterministic assertions support the exploration, and vision is optional and off by default.
+
+Changed:
+- Added frontend QA CLI and provider adapter scaffolding, key cleanup, reports, focused tests, PDD/SDD/TDD, README/policy updates, and current/task/handoff projections.
+
+Blocked/uncertain:
+- The Laya-driven browser exploration loop and live Laya runtime are not ready; Playwright and vision validation are incomplete; no live target or blind hidden holdout was run. Keep issue #9 open.
+
+Next:
+- Complete the Laya-driven Playwright exploration loop and provider/vision adapters, then run independent blind acceptance against Design Bakery and an operator-provided local Study OS URL; keep acceptance open until evidence passes.
