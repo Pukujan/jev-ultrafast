@@ -1,34 +1,34 @@
 ﻿# Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"JUF-0001","active_task_file":"tasks/TASK-JUF-0001-cgm-pcm-adopt.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"JUF-0003","active_task_file":"tasks/TASK-JUF-0003-frontend-qa-bootstrap.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
-This is an as-of projection; live GitHub issues own progression. Leaf: [#3](https://github.com/Pukujan/jev-ultrafast/issues/3) (parent: none). Task: JUF-0001. Branch: `chore/cgm-pcm-adopt`.
+This is an as-of projection; live GitHub issues own progression. Leaf: [#9](https://github.com/Pukujan/jev-ultrafast/issues/9) (parent: none). Task: JUF-0003. Branch: `task/JUF-0003-frontend-qa-bootstrap`.
 
 ## Program state
 
-CGM 0.5.4 + PCM overlay prepared locally; validators green; shipping via PR.
+Frontend QA terminal bootstrap is in progress. V1 accepts only already-reachable hosted or localhost URLs; local services are started by the operator. Laya-driven exploration is the default and required local path; Jev is a separately selected comparison arm. The CLI fails closed when Laya is unavailable. Its supported local `Router.predict` interface is documented, but the runtime and browser exploration loop are not ready. No Laya live acceptance was run.
 
 ## Completed
 
-- PCM schemas, `.continuity/config.json`, PROJECT / CURRENT / HANDOFF / tasks (prefix JUF)
-- CGM `.content-system` adapter pinned to helper 0.5.4 / `c95d73a`
-- Product README regen (writing-direction; no CGM cite)
-- OpenRouter Decisions alignment in `model.py` + `.env.example`
-- CI workflow with aggregate job `gates`
-- Issues enabled on the repo; leaf issue #3 filed
+- Terminal entry point, runner defaults/fail-closed selection, static evidence, CSV/Mermaid/provenance outputs, and offline HTML report scaffold
+- Task-scoped provider-policy exception recorded
+- PDD/SDD/TDD drafts and deterministic tests added
 
 ## Active
 
-- JUF-0001 / #3 — open PR, arm squash auto-merge, apply main ruleset requiring `gates`
+- JUF-0003 / #9 — implementation and validation; Grok Bot review required
 
 ## Queued
 
-- Verify `gates` on the PR; confirm ruleset after first green run
+- Complete provider/key integration and offline Mermaid rendering
+- Install/verify Laya only when checkpoint/runtime availability is confirmed; run blind acceptance on both requested targets
 
 ## Blockers
 
-None known for local validate. Hosted Actions must run before treating `gates` as verified.
+- Laya package/checkpoint absent; no Laya live acceptance yet
+- Playwright and vision judge are not configured; browser checks remain optional and vision is not run
+- Blind holdout belongs to independent reviewer and was not available to implementation worker
 
 ## Next atomic action
 
-Push branch, open PR to `main` with Refs #3, enable squash auto-merge, create/verify main ruleset with required check `gates`.
+Complete local deterministic checks, record exact blockers, then request Grok Bot review. Do not mark issue acceptance met while live Laya and blind holdout gates remain open.

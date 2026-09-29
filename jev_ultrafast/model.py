@@ -7,12 +7,14 @@ import time
 
 import httpx
 
+from .providers import touch_cli_key
 from .questions import NEXT_ACTION, TARGET, TEXT_VALUE
 
 CLIENT = httpx.Client(http2=True, timeout=25)
 
 
 def post_json(url, key, body):
+    touch_cli_key(key)
     for attempt in range(3):
         try:
             response = CLIENT.post(url, json=body, headers={"Authorization": f"Bearer {key}"})
@@ -122,9 +124,7 @@ def choose(state, goal, history):
     # Always OpenRouter Decisions first. Auth is OPENROUTER_API_KEY only.
     # OPENROUTER_MODEL is the OpenRouter model slug in the Decisions body
     # (e.g. typesafe/jev-1.13) — not a separate provider or TypeSafe-account path.
-    decisions_url = os.environ.get(
-        "OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions"
-    )
+    decisions_url = os.environ.get("OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions")
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY is required for Decisions; nothing executed.")

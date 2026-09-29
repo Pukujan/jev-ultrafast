@@ -11,9 +11,13 @@ Durable rules for who owns what when Ultrafast is used by adopters (e.g. Study-o
 
 Adopters **use** Ultrafast for crawls and defect reports. They do **not** own fork code. Code changes land here via this repo’s Grok Bot (jev-ultrafast).
 
-## OpenRouter Decisions (only)
+## Decision provider policies
 
-- Endpoint: `POST https://openrouter.ai/api/alpha/decisions` — always the primary (and only supported) decision path
+### Task-scoped frontend QA provider exception (JUF-0003 / issue #9)
+
+The existing Ultrafast browser agent continues to use OpenRouter Decisions as its only decision path. Issue #9 separately authorizes OpenRouter, TypeSafe, and OpenCode choices in the frontend QA bootstrap. This exception does not change the library agent's authentication contract. Provider credentials stay with the Jev package and are never read from or copied into a target repository. The current bootstrap discovers OpenRouter credentials and includes a unit-tested Laya SDK boundary, but its terminal flow does not yet run browser decisions. TypeSafe and OpenCode request adapters remain unfinished and must not be advertised as working.
+
+- Endpoint for the core browser agent: `POST https://openrouter.ai/api/alpha/decisions` — its primary and only supported decision path
 - Auth: `OPENROUTER_API_KEY` (server-side / env; never commit keys). No `TYPESAFE_API_KEY`.
 - Model: `OPENROUTER_MODEL` defaults to `typesafe/jev-1.13`. That value is an **OpenRouter model slug** in the Decisions body, not a TypeSafe-account or System One backend switch.
 - **No TypeSafe key required.** Decisions via OpenRouter is the supported path.
@@ -34,5 +38,5 @@ The defect-report contract lives in Study-os. Do **not** copy private study-log 
 
 1. Adopter asks for crawls/reports → run against their contract; do not treat their fork as source of truth for Ultrafast.
 2. Wiring, harness, CDP, schema alignment, Ultrafast patches → this repo / Grok Bot owns them.
-3. Prefer OpenRouter Decisions; never require a TypeSafe key.
+3. The core browser agent uses OpenRouter Decisions and never requires a TypeSafe key. See the task-scoped frontend QA exception above for issue #9's requested provider work.
 4. Never print secrets or API keys.

@@ -89,6 +89,18 @@ uv run --env-file .env python examples/run.py \
   --goal 'Continue as guest if offered. Explore a DSA or Big-O lesson. Stop when a worked example is visible.'
 ```
 
+### One-command frontend checks
+
+Provide an already-reachable hosted URL or localhost URL and write a portable report with:
+
+```bash
+uv run jev-frontend-qa
+```
+
+The operator starts local services and supplies their localhost URL; the CLI never launches target project commands. Local Laya-driven exploration is the default; select Jev explicitly for a separate comparison/alternate arm. Playwright is the browser substrate for the selected exploration, with deterministic assertions as supporting evidence. The evidence pipeline writes `defects.csv`, `workflow.mmd`, `run.json`, and an offline `report.html` under `artifacts/frontend-qa/`. It opens the saved report when QA finishes. Vision judging is a separate opt-in stage and is not included in this release. An empty report is not proof that every control works. The HTML chart uses an inline SVG; the Mermaid source is saved alongside it.
+
+The Laya/Playwright and Jev browser exploration loops and TypeSafe/OpenCode provider calls are not yet wired. The CLI defaults to Laya and fails closed if Laya is unavailable; it does not fall back to Jev or a deterministic-only pass. Installing the optional package with `uv sync --extra laya` does not download a model; its first prediction may fetch a checkpoint from Hugging Face. Live Laya-driven acceptance remains outstanding.
+
 ### Environment
 
 | Variable | Role |
