@@ -18,17 +18,17 @@ PCM overlay healthy; CGM pinned 0.5.7 @ c069613 with always-on HSW. JUF-0001 and
 
 ## Active
 
-- JUF-0003 / #9 — reconciliation increment: push this branch, open PR Refs #9, then run the first live Laya acceptance pass
+- JUF-0003 / #9 — reconciliation increment pushed (PR #11 Refs #9, checks running); first live Laya acceptance pass against Design Bakery executing now
 
 ## Queued
 
-- Live acceptance against https://www.design-bakery.com with the packaged Laya path (localdecide server installing in a separate venv now)
+- Live acceptance receipt for https://www.design-bakery.com, then issue #9 comment keyed to the checkpoint request id
 - Operator-hosted Study OS localhost URL for the second acceptance target
 - Hidden holdout grading by the independent reviewer; pass/fail receipt only on #9
 
 ## Blockers
 
-- Laya localdecide runtime: install in progress; no live run recorded yet
+- Laya localdecide runtime installing (CPU torch); the live pass starts the moment the server binary lands
 - The second acceptance target needs the operator to start Study OS and provide its URL
 - Holdout answers belong to the reviewer and stay out of this tree
 
