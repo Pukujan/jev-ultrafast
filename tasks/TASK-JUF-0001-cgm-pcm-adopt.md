@@ -1,8 +1,8 @@
 ﻿# TASK-JUF-0001 — Adopt CGM + PCM
 
-<!-- continuity:task {"acceptance":["continuity validate VALID / preflight TARGET_VALID","CGM validate_content_system stdout starts with VALID","PR to main linking issue #3","CI job named gates present","OpenRouter Decisions path in model.py without requiring TypeSafe key","README product-only (no CGM cite)"],"depends_on":[],"goal":"Adopt CGM 0.5.4 + PCM continuity overlay, OpenRouter Decisions wiring alignment, gates CI, and product README regen","id":"JUF-0001","issue_url":"https://github.com/Pukujan/jev-ultrafast/issues/3","next_action":"Push branch, open PR Refs #3, arm squash auto-merge, apply main ruleset with required gates","owner":"Grok Bot","priority":"high","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Fresh agents need TARGET_VALID continuity and evidence-bounded product docs without requiring a TypeSafe key"} -->
+<!-- continuity:task {"acceptance":["continuity validate VALID / preflight TARGET_VALID","CGM validate_content_system stdout starts with VALID","PR to main linking issue #3","CI job named gates present","OpenRouter Decisions path in model.py without requiring TypeSafe key","README product-only (no CGM cite)"],"depends_on":[],"goal":"Adopt CGM 0.5.4 + PCM continuity overlay, OpenRouter Decisions wiring alignment, gates CI, and product README regen","id":"JUF-0001","issue_url":"https://github.com/Pukujan/jev-ultrafast/issues/3","next_action":"None; shipped via PR #4 (squash 1111985)","owner":"Grok Bot","priority":"high","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"Fresh agents need TARGET_VALID continuity and evidence-bounded product docs without requiring a TypeSafe key"} -->
 
-- Status: active
+- Status: completed
 - Owner: Grok Bot
 - Priority: high
 - Depends on: none
@@ -39,7 +39,7 @@ A new session can recover purpose, OpenRouter-only auth, Study-os pointers, and 
 
 - [x] `continuity validate` VALID / preflight TARGET_VALID
 - [x] CGM validate stdout starts with VALID
-- [ ] PR to main linking issue #3
+- [x] PR to main linking issue #3
 - [x] CI job named `gates` present
 - [x] OpenRouter Decisions path in `model.py` without requiring TypeSafe key
 - [x] README product-only (no CGM cite)
@@ -77,6 +77,10 @@ Decisions:
 - Mature TARGET_ADOPTION overlay (init refused AGENTS.md/README.md conflicts)
 - Task prefix JUF; register existing product screenshots/gif as non-narrative assets
 - Align model.py with POLICY OpenRouter Decisions (no TypeSafe key required)
+
+Reconcile 2026-09-29 (JUF-0003 session):
+- PR #4 squash-merged as 1111985; CI success recorded on issue #3 (comment 5853244450).
+- Issue #3 receipt posted; leaf closing with this projection. Live issue state owns lifecycle.
 
 Blocked/uncertain:
 - Hosted Actions / required-check `gates` not yet verified on a live PR
