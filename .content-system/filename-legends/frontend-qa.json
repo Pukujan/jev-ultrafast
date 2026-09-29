@@ -1,0 +1,87 @@
+{
+  "schema_version": "content-generation.filename-legend.v1",
+  "feature": "frontend-qa",
+  "glossary": [
+    {
+      "token": "<date> <host> <purpose>",
+      "meaning": "run folder name: ISO date, URL host, short purpose phrase, e.g. 2026-09-29 www.design-bakery.com first pass"
+    },
+    {
+      "token": "defects.csv",
+      "meaning": "fixed contract name: one row per finding"
+    },
+    {
+      "token": "workflow.mmd",
+      "meaning": "fixed contract name: Mermaid chart from events.json"
+    },
+    {
+      "token": "run.json",
+      "meaning": "fixed contract name: provenance record"
+    },
+    {
+      "token": "events.json",
+      "meaning": "fixed contract name: raw page event trace"
+    },
+    {
+      "token": "report.html",
+      "meaning": "fixed contract name: saved offline report"
+    },
+    {
+      "token": "mermaid.min.js",
+      "meaning": "bundled renderer copy; version and sha256 in run.json"
+    },
+    {
+      "token": "evidence/",
+      "meaning": "screenshot and metric folder inside the run folder"
+    },
+    {
+      "token": "step <NN> <what>.png",
+      "meaning": "speakable screenshot basename: zero-padded step, plain phrase, e.g. step 07 landing page.png"
+    },
+    {
+      "token": "step-<NN>--<what>.png",
+      "meaning": "safe twin when spaces are not storable"
+    },
+    {
+      "token": "link <NN> <host>.json",
+      "meaning": "per-link status probe record"
+    },
+    {
+      "token": "keywatch.json",
+      "meaning": "idle-key watchdog state file under the run root"
+    }
+  ],
+  "files": [
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/defects.csv"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/workflow.mmd"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/run.json"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/events.json"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/report.html"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/mermaid.min.js"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/evidence/step 07 landing page.png"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/evidence/step-07--landing-page.png",
+      "style": "safe_twin"
+    },
+    {
+      "path": "qa-runs/2026-09-29 www.design-bakery.com first pass/evidence/link 03 design-bakery.com.json"
+    },
+    {
+      "path": "qa-runs/keywatch.json"
+    }
+  ]
+}

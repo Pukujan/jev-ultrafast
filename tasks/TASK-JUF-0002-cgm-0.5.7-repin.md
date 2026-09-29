@@ -1,8 +1,8 @@
 # TASK-JUF-0002 - Re-pin CGM 0.5.7 + always-on HSW
 
-<!-- continuity:task {"acceptance":["adapter validate stdout starts with VALID","writing-mode validate stdout starts with VALID","verify_hsw_applied HSW_VERIFY OK","pin helper_version 0.5.7 @ c069613ca8b3e02bcf5aba1960160583537f8a3a with eight modules including human-output-naming","AGENTS.md contains always-on CGM writing rule block","PR Refs #7 merged or squash auto-merge armed"],"depends_on":[],"goal":"Re-pin CGM 0.5.4 to 0.5.7, eight modules, always-on HSW inject in AGENTS.md, validate+verify","id":"JUF-0002","issue_url":"https://github.com/Pukujan/jev-ultrafast/issues/7","next_action":"Push branch, open PR Refs #7, arm squash auto-merge when gates green","owner":"Grok Bot","priority":"high","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"0.5.7 adds human-output-naming and requires every adopter to paste the always-on writing block at agent boot"} -->
+<!-- continuity:task {"acceptance":["adapter validate stdout starts with VALID","writing-mode validate stdout starts with VALID","verify_hsw_applied HSW_VERIFY OK","pin helper_version 0.5.7 @ c069613ca8b3e02bcf5aba1960160583537f8a3a with eight modules including human-output-naming","AGENTS.md contains always-on CGM writing rule block","PR Refs #7 merged or squash auto-merge armed"],"depends_on":[],"goal":"Re-pin CGM 0.5.4 to 0.5.7, eight modules, always-on HSW inject in AGENTS.md, validate+verify","id":"JUF-0002","issue_url":"https://github.com/Pukujan/jev-ultrafast/issues/7","next_action":"None; shipped via PR #8 (merge d92fcc9), issue #7 closed","owner":"Grok Bot","priority":"high","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"0.5.7 adds human-output-naming and requires every adopter to paste the always-on writing block at agent boot"} -->
 
-- Status: active
+- Status: completed
 - Owner: Grok Bot
 - Priority: high
 - Depends on: none
@@ -36,12 +36,12 @@ Agents boot with the pinned 0.5.7 writing rule; validate and verify_hsw_applied 
 
 ## Acceptance criteria
 
-- [ ] Adapter validate stdout starts with VALID
-- [ ] Writing-mode validate stdout starts with VALID
-- [ ] verify_hsw_applied HSW_VERIFY OK
-- [ ] Pin is 0.5.7 @ c069613… with eight modules including human-output-naming
-- [ ] AGENTS.md contains the always-on CGM writing rule block
-- [ ] PR Refs #7 merged or squash auto-merge armed
+- [x] Adapter validate stdout starts with VALID
+- [x] Writing-mode validate stdout starts with VALID
+- [x] verify_hsw_applied HSW_VERIFY OK
+- [x] Pin is 0.5.7 @ c069613… with eight modules including human-output-naming
+- [x] AGENTS.md contains the always-on CGM writing rule block
+- [x] PR Refs #7 merged or squash auto-merge armed
 
 ## Evidence and sources
 
@@ -71,11 +71,15 @@ Decisions:
 - No `.content-system/filename-legends/` yet — assets have no `feature` claims; adapter legend dir optional when absent
 - Keep README product-only (no CGM cite)
 
+Reconcile 2026-09-29 (JUF-0003 session):
+- PR #8 squash-merged as d92fcc9 with gates/quality/test green; issue #7 closed COMPLETED 2026-09-28.
+- All six acceptance rows met by the merge; projection flipped to completed.
+
 Blocked/uncertain:
 - Hosted `gates` check must go green before squash merge completes
 
 Next:
-- Commit, push `juf/cgm-0.5.7-repin`, open PR Refs #7, arm squash auto-merge
+- None. Shipped; see 2026-09-29 reconcile above
 
 ## Handoff
 
