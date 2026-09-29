@@ -28,6 +28,11 @@ Fork lineage: this repository is [Pukujan/jev-ultrafast](https://github.com/Puku
 - **Local inspector** — `uv run jev` at http://127.0.0.1:8766 with numbered elements and probabilities.
 - **Study-os guest crawls** — explore https://study.design-bakery.com and log artifacts aligned to the Study-os UX defect contract by reference (see [docs/POLICY.md](docs/POLICY.md)).
 - **Committed demos** — Flights and Wikipedia examples under `examples/`, plus measurement docs.
+- **Frontend QA from one terminal** — `uv run jev-qa --url https://…` runs a
+  guided Laya exploration (default, local, no keys), optional Playwright
+  evidence and opt-in vision stages, and opens an offline `report.html` with
+  defects.csv, workflow.mmd, and run.json in the run folder.
+  [Operator flows](docs/qa/user-flow.md) · [adapter contract](docs/qa/adapter-spec.md)
 
 ## How it works
 
