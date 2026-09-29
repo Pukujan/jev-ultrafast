@@ -6,7 +6,7 @@ This is an as-of projection; live GitHub issues own progression. Leaf: [#9](http
 
 ## Program state
 
-PCM overlay healthy; CGM pinned 0.5.7 @ c069613 with always-on HSW. JUF-0001 and JUF-0002 shipped and reconciled (issues #3, #7 closed). The JUF-0003 frontend QA harness shipped to `main` through PR #10 (merge 656c42a): the `jev-qa` URL-only CLI, local Laya default with fail-closed discovery, the Jev comparison arm, Playwright and vision stages, keywatch cleanup, offline report, and 208 offline tests. This branch no longer carries a parallel scaffold; it now carries the reconciliation increment — merging main, retiring the superseded scaffold, and fixing the three Windows-only test failures the merge exposed.
+PCM overlay healthy; CGM pinned 0.5.7 @ c069613 with always-on HSW. JUF-0001 and JUF-0002 shipped and reconciled (issues #3, #7 closed). The JUF-0003 frontend QA harness shipped to `main` through PR #10 (merge 656c42a) and the bootstrap-stream reconciliation through PR #11 (merge 1a4f3db): the `jev-qa` URL-only CLI, local Laya default with fail-closed discovery, the Jev comparison arm, Playwright and vision stages, keywatch cleanup, offline report, and offline tests green on Windows. The first live Design Bakery pass proved the Laya path end to end (healthz, describe-v1 decisions, artifacts, offline report) but found the evidence stage mislabeled `failed-setup` over a real code bug: `page.title` read as a property. This branch fixes that, splits runtime faults from setup faults, and makes the browser setup-failure path record its run.
 
 ## Completed
 
@@ -18,17 +18,17 @@ PCM overlay healthy; CGM pinned 0.5.7 @ c069613 with always-on HSW. JUF-0001 and
 
 ## Active
 
-- JUF-0003 / #9 — reconciliation increment pushed (PR #11 Refs #9, checks running); first live Laya acceptance pass against Design Bakery executing now
+- JUF-0003 / #9 — live-fixes increment on `task/JUF-0003-qa-live-fixes` (d92b6a4): title() fix, failed/failed-setup split, setup-failure recording, docs synced; live re-run executing now
 
 ## Queued
 
-- Live acceptance receipt for https://www.design-bakery.com, then issue #9 comment keyed to the checkpoint request id
+- Live acceptance receipt for https://www.design-bakery.com with the fixed evidence stage (re-run executing)
 - Operator-hosted Study OS localhost URL for the second acceptance target
 - Hidden holdout grading by the independent reviewer; pass/fail receipt only on #9
 
 ## Blockers
 
-- Laya localdecide runtime installing (CPU torch); the live pass starts the moment the server binary lands
+- None for the code path; the live re-run is executing against the repaired environment
 - The second acceptance target needs the operator to start Study OS and provide its URL
 - Holdout answers belong to the reviewer and stay out of this tree
 

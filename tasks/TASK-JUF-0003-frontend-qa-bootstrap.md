@@ -130,6 +130,29 @@ Blocked/uncertain:
 Next:
 - Collect the Design Bakery live-Laya receipt from the running acceptance slice, post it on #9, then final-push and arm gates on PR #11 only after checks are verified on the last push.
 
+### 2026-09-29 23:05:56 UTC — Luna worker (live acceptance fixes), parallel subagent orchestration
+
+<!-- continuity:checkpoint {"agent":"Luna worker (live acceptance fixes), parallel subagent orchestration","blocked":["Study OS acceptance still needs the operator's localhost URL; hidden-holdout grading belongs to the reviewer; a fresh live re-run with the fixed stage must record real findings (or honestly none) before AC9 Design Bakery closes. Issue #9 stays open."],"changed":["jev_ultrafast/qa/playwright_stage.py, jev_ultrafast/qa/artifacts.py, jev_ultrafast/qa/report.py, jev_ultrafast/qa/cli.py, docs/qa/adapter-spec.md, docs/qa/user-flow.md, tests/test_qa_playwright.py, tests/test_qa_cli.py, tests/test_qa_fuzz.py, tests/test_qa_artifacts.py, checkpoints/CURRENT.md."],"completed":["First live Design Bakery pass through the packaged jev-qa path: localdecide server on 127.0.0.1:8791 answered healthz and describe-v1 /v1/systemone decisions (backend laya-torch); the run wrote defects.csv, events.json, workflow.mmd, run.json, and an offline report.html. The pass exposed three shipped-code faults, all fixed on this increment: page.title read as a property crashed the evidence stage and mislabeled it failed-setup; fatal sweep faults now record failed while missing-browser/import faults keep failed-setup; and the browser setup-failure path returned exit 2 without writing the run, breaking the recorded-run promise. Test doubles now match the real Playwright API."],"decisions":["failed-setup stays reserved for environment repair; a code fault must never read like a missing browser install; the Laya acceptance environment is proven reproducible (serve + dedicated Chrome on BU_CDP_URL)."],"evidence":["Windows full suite 211 passed 1 skipped (ruff clean, node check, uv build, continuity validate VALID); live facts in qa-runs folders 2 and 3 and the acceptance agent report; classification tests pin failed vs failed-setup; CLI test pins the four writers on the setup-failure path."],"next_action":"Merge this increment, rerun the single Design Bakery pass from merged main with the repaired evidence stage, and post its independent-confirmation receipt on #9.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JUF-0003","timestamp":"2026-09-29T23:05:56Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"65ad885fcb9f1c30236754ef684841ab5a28ba3651de5c26d0cbe678a23ef28c","request_id":"juf-0003-20260929-livefix1","schema":"project-continuity.checkpoint-operation.v1","task_id":"JUF-0003"} -->
+
+Completed:
+- First live Design Bakery pass through the packaged jev-qa path: localdecide server on 127.0.0.1:8791 answered healthz and describe-v1 /v1/systemone decisions (backend laya-torch); the run wrote defects.csv, events.json, workflow.mmd, run.json, and an offline report.html. The pass exposed three shipped-code faults, all fixed on this increment: page.title read as a property crashed the evidence stage and mislabeled it failed-setup; fatal sweep faults now record failed while missing-browser/import faults keep failed-setup; and the browser setup-failure path returned exit 2 without writing the run, breaking the recorded-run promise. Test doubles now match the real Playwright API.
+
+Evidence:
+- Windows full suite 211 passed 1 skipped (ruff clean, node check, uv build, continuity validate VALID); live facts in qa-runs folders 2 and 3 and the acceptance agent report; classification tests pin failed vs failed-setup; CLI test pins the four writers on the setup-failure path.
+
+Decisions:
+- failed-setup stays reserved for environment repair; a code fault must never read like a missing browser install; the Laya acceptance environment is proven reproducible (serve + dedicated Chrome on BU_CDP_URL).
+
+Changed:
+- jev_ultrafast/qa/playwright_stage.py, jev_ultrafast/qa/artifacts.py, jev_ultrafast/qa/report.py, jev_ultrafast/qa/cli.py, docs/qa/adapter-spec.md, docs/qa/user-flow.md, tests/test_qa_playwright.py, tests/test_qa_cli.py, tests/test_qa_fuzz.py, tests/test_qa_artifacts.py, checkpoints/CURRENT.md.
+
+Blocked/uncertain:
+- Study OS acceptance still needs the operator's localhost URL; hidden-holdout grading belongs to the reviewer; a fresh live re-run with the fixed stage must record real findings (or honestly none) before AC9 Design Bakery closes. Issue #9 stays open.
+
+Next:
+- Merge this increment, rerun the single Design Bakery pass from merged main with the repaired evidence stage, and post its independent-confirmation receipt on #9.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → docs/qa/adapter-spec.md → issue #9
