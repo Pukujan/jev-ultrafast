@@ -27,6 +27,8 @@ WATCH_POLL_SECONDS = 60.0
 def pid_alive(pid) -> bool:
     if not isinstance(pid, int) or pid <= 0:
         return False
+    if os.name == "nt":
+        return _pid_alive_nt(pid)
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -34,6 +36,29 @@ def pid_alive(pid) -> bool:
     except PermissionError:
         return True  # exists but belongs to someone else
     return True
+
+
+def _pid_alive_nt(pid: int) -> bool:
+    """Query liveness through kernel32; os.kill(pid, 0) raises WinError 87 on Windows.
+
+    A pid that cannot be opened or queried counts as dead so the CLI respawns
+    its watcher; the state-file lock keeps a duplicate from running twice.
+    """
+    import ctypes
+
+    process_query_limited_information = 0x1000
+    still_active = 259
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.OpenProcess(process_query_limited_information, False, pid)
+    if not handle:
+        return False
+    try:
+        exit_code = ctypes.c_ulong()
+        if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+            return False
+        return exit_code.value == still_active
+    finally:
+        kernel32.CloseHandle(handle)
 
 
 def spawn_watcher(state_path):

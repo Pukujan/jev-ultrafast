@@ -157,9 +157,11 @@ thread is out. The mechanism is a detached child plus a state file:
 
 - `providers.py` inserts a CLI-typed key as one exact line in the package
   `.env` and records in `qa-runs/keywatch.json`: variable name, sha256 of
-  the inserted line bytes, inserted_at, last_used (refreshed by every run
-  that authenticates with that value), `opted_out` (answer to the 3-hour
-  question; default false = cleanup on), pid of the watcher.
+  the inserted `NAME=value` content (newline style excluded, so a Windows
+  editor re-saving the file with CRLF does not orphan the cleanup),
+  inserted_at, last_used (refreshed by every run that authenticates with
+  that value), `opted_out` (answer to the 3-hour question; default false =
+  cleanup on), pid of the watcher.
 - At run end (only when a key was newly inserted and cleanup was not
   declined), the CLI spawns the watcher with `[sys.executable, "-m",
   "jev_ultrafast.qa.keywatch", "--state", <abs state path>]` — never a
@@ -170,10 +172,10 @@ thread is out. The mechanism is a detached child plus a state file:
   `now - last_used >= IDLE_KEY_TTL_SECONDS` with `opted_out` false it
   performs the guarded delete and exits.
 - Guarded delete: re-read the `.env` line for that variable; remove it only
-  when its bytes still hash to the recorded value. If the operator retyped
-  the variable (their own credential), the hash differs and the watcher
-  leaves it alone and records `skipped_changed`. Name alone is never
-  grounds for deletion.
+  when its content still hashes to the recorded value. If the operator
+  retyped the variable (their own credential), the digest differs and the
+  watcher leaves it alone and records `skipped_changed`. Name alone is
+  never grounds for deletion.
 - Lock: the watcher and every CLI start acquire an exclusive lock on
   `keywatch.json` (`os.O_CREAT|os.O_EXCL` lockfile with pid + staleness
   takeover after 60s). On start, the CLI first reconciles: expired inserts
