@@ -147,7 +147,9 @@ corroboration. Skipping Playwright is a supported choice, recorded honestly.
 
 Outcome. The stage writes `failed-setup` into the `run.json` stage table, adds
 no findings, and never pretends it ran. The run completes on explorer
-evidence alone. Exit code 0.
+evidence alone. Exit code 0. If a browser launches but the sweep itself dies,
+the stage records `failed` with the error text instead, so a code fault is
+never mislabeled as a missing install.
 
 ## Flow 6. Local vision through Ollama
 
@@ -210,7 +212,7 @@ date, the URL host, and a short purpose phrase, for example
 | `defects.csv` | One row per finding; the twelve fixed columns; `evidence_refs` joined by `;`; rows ordered by step, then stage |
 | `events.json` | Every page event with snake-case keys; the chart's sole input |
 | `workflow.mmd` | `flowchart TD` built from events; the failing step carries the `failing` class; no LLM touches this file |
-| `run.json` | run id, ISO start/finish, target, runner, provider or null, model/backend, stage table (`playwright: on\|skipped\|failed-setup`, `vision: off\|declined\|ran`), step and finding counts, renderer provenance (`mermaid 11.17.2` with sha256), tool versions, git sha, evidence sha256 index |
+| `run.json` | run id, ISO start/finish, target, runner, provider or null, model/backend, stage table (`playwright: on\|skipped\|failed-setup\|failed`, `vision: off\|declined\|ran`), step and finding counts, renderer provenance (`mermaid 11.17.2` with sha256), tool versions, git sha, evidence sha256 index |
 | `report.html` | Saved offline report; opens via the default browser; outcome banner, one section per defect with its reproducible action and evidence thumbnails, the workflow chart with failing nodes linked to their defect rows, provenance appendix |
 | `mermaid.min.js`, `mermaid.INFO.txt` | Bundled renderer copies so the report opens with no network |
 | `evidence/` | Screenshots with speakable names (`step 07 landing page.png`) and per-link probe records (`link 03 www.design-bakery.com.json`) |

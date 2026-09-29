@@ -312,6 +312,8 @@ def test_stage_table_variants(tmp_path):
     assert artifacts.playwright_stage_status(skipped) == "skipped"
     failed = make_context(tmp_path, provenance={"playwright_stage": "failed-setup"})
     assert artifacts.playwright_stage_status(failed) == "failed-setup"
+    crashed = make_context(tmp_path, provenance={"playwright_stage": "failed"})
+    assert artifacts.playwright_stage_status(crashed) == "failed"
     declined = make_context(tmp_path, vision_mode="openrouter", provenance={"vision_stage": "declined"})
     assert artifacts.vision_stage_status(declined) == "declined"
     no_model = make_context(tmp_path, vision_mode="ollama", provenance={"vision_stage": "skipped-no-model"})

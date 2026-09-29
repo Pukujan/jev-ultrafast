@@ -4,8 +4,9 @@ The stage revisits the URLs the exploration recorded, measures each page
 with fixed settings, and reports what it can prove: link statuses, page
 and console errors, layout overflow. It does not explore and does not
 decide. Playwright is imported lazily inside run(); a missing browser
-binary becomes a failed-setup provenance entry, never an exception, and
-the run keeps its explorer evidence.
+binary becomes a failed-setup provenance entry and any later fatal sweep
+fault a failed one, never an exception, so the run keeps its explorer
+evidence either way.
 """
 
 from __future__ import annotations
@@ -171,6 +172,19 @@ def _layout_detail(item: dict) -> str:
     return " ".join(parts)
 
 
+def _is_setup_failure(exc: Exception) -> bool:
+    """True when the stage never got a browser: missing package or missing binary.
+
+    Anything else is a mid-sweep runtime fault. Labeling a runtime crash
+    `failed-setup` hides it behind environment-repair advice: the operator
+    would reinstall browsers while a code bug kept failing the sweep.
+    """
+    if isinstance(exc, ImportError):
+        return True
+    text = str(exc).lower()
+    return "executable doesn't exist" in text or "playwright install" in text
+
+
 class PlaywrightStage:
     """Browser evidence sweep over the exploration's visited pages.
 
@@ -190,7 +204,9 @@ class PlaywrightStage:
         try:
             self._sweep(context)
         except Exception as exc:  # fail closed: record it, add nothing, never raise
-            context.provenance["playwright_stage"] = "failed-setup"
+            context.provenance["playwright_stage"] = (
+                "failed-setup" if _is_setup_failure(exc) else "failed"
+            )
             context.provenance["playwright_error"] = str(exc)
 
     def _sweep(self, context: contracts.RunContext) -> None:
@@ -243,7 +259,7 @@ class PlaywrightStage:
             timing = page.evaluate(NAV_TIMING_JS)
             if isinstance(timing, dict):
                 record["load_ms"] = timing.get("load_ms")
-            record["title"] = page.title or ""
+            record["title"] = page.title() or ""
             shot_started = time.perf_counter()
             record["_png"] = page.screenshot()
             record["screenshot_ms"] = round((time.perf_counter() - shot_started) * 1000, 1)

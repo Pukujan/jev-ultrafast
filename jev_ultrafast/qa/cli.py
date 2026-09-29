@@ -268,8 +268,18 @@ def _run(args):
         terminal = Explorer(config, context, decider=decider).run()
         say(f"Exploration finished: {terminal}.")
         if terminal == "browser_error" and not context.events:
-            # The target never opened: a setup failure, not a site defect.
+            # The target never opened: a setup failure, not a site defect. A failed
+            # run is still a recorded run, so the evidence files go down first.
             reason = context.provenance.get("explorer_open_error", "unknown error")
+            context.provenance["run_error"] = f"browser setup failed: {reason}"[:200]
+            try:
+                artifacts = _import("artifacts")
+                artifacts.write_events(run_dir, context.events)
+                artifacts.write_workflow(run_dir, context.events, terminal=context.provenance.get("explorer_terminal"))
+                artifacts.write_defects(run_dir, context.findings)
+                artifacts.write_run(run_dir, context)
+            except Exception:
+                pass
             say(f"Could not open {url} ({reason}). Check that the URL is reachable and try again.")
             return 2
         if config.playwright:
