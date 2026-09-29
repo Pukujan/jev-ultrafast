@@ -31,6 +31,7 @@ Browser automation that asks an LLM to invent scripts or selectors is brittle an
 - OpenRouter Decisions API path (`https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.13`) with `OPENROUTER_API_KEY` only — no TypeSafe key required.
 - Browser Harness / Chrome CDP connection, local inspector demo, library `Agent` API.
 - Study-os guest/UX defect crawls against https://study.design-bakery.com and artifact logging aligned to the Study-os defect contract by reference.
+- Task-scoped frontend QA terminal bootstrap (JUF-0003 / issue #9); see `docs/POLICY.md`. This does not change the core browser agent's OpenRouter-only provider contract.
 - Fork maintenance relative to upstream `browser-use/jev-ultrafast`.
 
 ## Non-goals

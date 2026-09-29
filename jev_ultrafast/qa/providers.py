@@ -97,6 +97,17 @@ def _find_line(env_path, name: str) -> bytes | None:
     return None
 
 
+def _line_digest(line: bytes) -> str:
+    """sha256 of a line's content, independent of its newline style.
+
+    Windows text editors save .env files with CRLF. The identity of a
+    CLI-inserted credential is its `NAME=value` bytes, so an editor re-save
+    must not make the tool forget its own line; a retyped value still
+    changes the digest and is left alone.
+    """
+    return hashlib.sha256(line.rstrip(b"\r\n")).hexdigest()
+
+
 def read_env_value(name: str, *, env_path=None) -> str | None:
     """Value stored for `name` in the env file, or None. Callers never log this return."""
     line = _find_line(env_path if env_path is not None else env_file_path(), name)
@@ -247,8 +258,8 @@ def insert_key(env_path, name: str, value: str, *, state_path=None, clock=time.t
     """Append one exact `NAME=value` line to the env file and record it in the ledger.
 
     Refuses to touch an existing variable of the same name. Returns the
-    appended record: name, env_path, line_sha256 (hash of the exact inserted
-    line bytes), inserted_at, last_used, opted_out.
+    appended record: name, env_path, line_sha256 (content digest of the
+    inserted line, independent of newline style), inserted_at, last_used, opted_out.
     """
     env_path = Path(env_path)
     state_path = Path(state_path) if state_path is not None else state_file_path()
@@ -269,7 +280,7 @@ def insert_key(env_path, name: str, value: str, *, state_path=None, clock=time.t
     record = {
         "name": name,
         "env_path": str(env_path.resolve()),
-        "line_sha256": hashlib.sha256(line).hexdigest(),
+        "line_sha256": _line_digest(line),
         "inserted_at": now,
         "last_used": now,
         "opted_out": False,
@@ -295,7 +306,7 @@ def mark_used(name: str, value: str, *, env_path=None, state_path=None, clock=ti
         line = _find_line(env_path, name)
         if line is None:
             return False
-        digest = hashlib.sha256(line).hexdigest()
+        digest = _line_digest(line)
         for record in state["records"]:
             if record.get("name") != name or record.get("skipped_changed"):
                 continue
@@ -310,8 +321,8 @@ def mark_used(name: str, value: str, *, env_path=None, state_path=None, clock=ti
 
 
 def guarded_remove(record: dict) -> str:
-    """Remove the recorded line from its env file only while the bytes still
-    hash to the recorded value. Other lines are never touched.
+    """Remove the recorded line only while its content still matches the
+    recorded digest. Other lines are never touched.
 
     Returns "removed", or "skipped_changed" when the line is missing or no
     longer matches (the operator retyped it with their own credential).
@@ -324,7 +335,7 @@ def guarded_remove(record: dict) -> str:
     lines = raw.splitlines(keepends=True)
     pattern = re.compile(rb"^\s*" + re.escape(str(record.get("name", "")).encode()) + rb"\s*=")
     for index, line in enumerate(lines):
-        if pattern.match(line) and hashlib.sha256(line).hexdigest() == record.get("line_sha256"):
+        if pattern.match(line) and _line_digest(line) == record.get("line_sha256"):
             env_path.write_bytes(b"".join(lines[:index] + lines[index + 1 :]))
             return "removed"
     return "skipped_changed"

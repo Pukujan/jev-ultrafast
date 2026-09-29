@@ -107,6 +107,29 @@ Blocked/uncertain:
 Next:
 - Integrate module implementations, full offline test matrix, gates, PR Refs #9
 
+### 2026-09-29 22:15:39 UTC — Luna worker (bootstrap stream), owner-directed parallel continuation
+
+<!-- continuity:checkpoint {"agent":"Luna worker (bootstrap stream), owner-directed parallel continuation","blocked":["AC9 live runs open: Design Bakery Laya pass executing now on this machine; Study OS acceptance needs the operator's localhost URL; hidden-holdout grading belongs to the reviewer. Issue #9 stays open."],"changed":["docs/qa/adapter-spec.md, jev_ultrafast/qa/keywatch.py, jev_ultrafast/qa/providers.py, tests/test_qa_providers.py, checkpoints/CURRENT.md, tasks/TASK-JUF-0003-frontend-qa-bootstrap.md; deleted superseded scaffold modules/tests/docs."],"completed":["Reconciled the bootstrap stream with the shipped harness: merged main 656c42a, retired the superseded scaffold, and fixed the three Windows-only failures the merge exposed (kernel32 pid liveness; newline-agnostic inserted-key digest so CRLF editor re-saves keep idle cleanup working)."],"decisions":["main is the single frontend QA implementation; key identity is NAME=value content, not raw bytes; no scaffold code is ported back."],"evidence":["Windows: ruff clean on jev_ultrafast+tests; pytest 209 passed 1 skipped; node --check, uv build, continuity validate all green; pushed chain bd137ae/0aacba3/fe70b39; PR #11 Refs #9 open."],"next_action":"Collect the Design Bakery live-Laya receipt from the running acceptance slice, post it on #9, then final-push and arm gates on PR #11 only after checks are verified on the last push.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JUF-0003","timestamp":"2026-09-29T22:15:39Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"6b5900a4bafd049cc1e71fdcc3e0c6e07506f33876560174b54d5306f0727262","request_id":"juf-0003-20260929-fe70b391","schema":"project-continuity.checkpoint-operation.v1","task_id":"JUF-0003"} -->
+
+Completed:
+- Reconciled the bootstrap stream with the shipped harness: merged main 656c42a, retired the superseded scaffold, and fixed the three Windows-only failures the merge exposed (kernel32 pid liveness; newline-agnostic inserted-key digest so CRLF editor re-saves keep idle cleanup working).
+
+Evidence:
+- Windows: ruff clean on jev_ultrafast+tests; pytest 209 passed 1 skipped; node --check, uv build, continuity validate all green; pushed chain bd137ae/0aacba3/fe70b39; PR #11 Refs #9 open.
+
+Decisions:
+- main is the single frontend QA implementation; key identity is NAME=value content, not raw bytes; no scaffold code is ported back.
+
+Changed:
+- docs/qa/adapter-spec.md, jev_ultrafast/qa/keywatch.py, jev_ultrafast/qa/providers.py, tests/test_qa_providers.py, checkpoints/CURRENT.md, tasks/TASK-JUF-0003-frontend-qa-bootstrap.md; deleted superseded scaffold modules/tests/docs.
+
+Blocked/uncertain:
+- AC9 live runs open: Design Bakery Laya pass executing now on this machine; Study OS acceptance needs the operator's localhost URL; hidden-holdout grading belongs to the reviewer. Issue #9 stays open.
+
+Next:
+- Collect the Design Bakery live-Laya receipt from the running acceptance slice, post it on #9, then final-push and arm gates on PR #11 only after checks are verified on the last push.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → docs/qa/adapter-spec.md → issue #9

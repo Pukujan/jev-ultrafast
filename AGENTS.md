@@ -41,7 +41,7 @@ Full rules: [docs/POLICY.md](docs/POLICY.md).
 
 - Adopters (e.g. Study-os) **use** Ultrafast for crawls/defect reports — they do **not** own fork code.
 - This repo's Grok Bot owns OpenRouter Decisions wiring, harness/CDP, artifact schema alignment, and Ultrafast code changes.
-- OpenRouter Decisions only (no TypeSafe key): `POST https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.13`.
+- Core browser agent: OpenRouter Decisions only (no TypeSafe key). Task JUF-0003 / issue #9 separately scopes alternative providers to the frontend QA bootstrap; see `docs/POLICY.md` for current implementation limits.
 - Study-os live target: https://study.design-bakery.com (guest). Defect contract: Study-os `docs/PDD_UX_DEFECT_EXPLORATION.md` + `docs/schemas/ux-defect-report.v1.json`.
 
 ## Delivery gates

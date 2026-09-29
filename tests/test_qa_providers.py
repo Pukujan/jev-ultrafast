@@ -112,10 +112,10 @@ def test_insert_appends_one_exact_line_and_records_state(env_file, state_file):
     record = providers.insert_key(env_file, "OPENROUTER_API_KEY", SECRET, state_path=state_file, clock=lambda: 100.0)
 
     assert env_file.read_text() == f"PRE_EXISTING=keep\nOPENROUTER_API_KEY={SECRET}\n"
-    line = f"OPENROUTER_API_KEY={SECRET}\n"
     assert record["name"] == "OPENROUTER_API_KEY"
     assert record["env_path"] == str(env_file.resolve())
-    assert record["line_sha256"] == hashlib.sha256(line.encode()).hexdigest()
+    # Identity covers the NAME=value content, not the newline style.
+    assert record["line_sha256"] == hashlib.sha256(f"OPENROUTER_API_KEY={SECRET}".encode()).hexdigest()
     assert record["inserted_at"] == 100.0
     assert record["last_used"] == 100.0
     assert record["opted_out"] is False
@@ -129,7 +129,7 @@ def test_insert_creates_missing_env_file(tmp_path, state_file):
     env_file = tmp_path / "new.env"
     record = providers.insert_key(env_file, "VISION_API_KEY", "v", state_path=state_file)
     assert env_file.read_text() == "VISION_API_KEY=v\n"
-    assert record["line_sha256"] == hashlib.sha256(b"VISION_API_KEY=v\n").hexdigest()
+    assert record["line_sha256"] == hashlib.sha256(b"VISION_API_KEY=v").hexdigest()
 
 
 def test_insert_separates_file_without_trailing_newline(env_file, state_file):
@@ -202,3 +202,25 @@ def test_state_survives_reload_for_restart_recovery(env_file, state_file):
     # Corrupt state falls back to an empty ledger instead of crashing.
     state_file.write_text("{not json", encoding="utf-8")
     assert providers.load_state(state_file) == {"watcher_pid": None, "records": []}
+
+
+def test_crlf_editor_save_keeps_the_inserted_line_identifiable(env_file, state_file):
+    now = [100.0]
+    clock = lambda: now[0]  # noqa: E731
+    providers.insert_key(env_file, "OPENROUTER_API_KEY", SECRET, state_path=state_file, clock=clock)
+    # A Windows editor re-saves the file with CRLF endings; that is not an operator retyping.
+    env_file.write_bytes(env_file.read_bytes().replace(b"\n", b"\r\n"))
+
+    now[0] = 250.0
+    assert providers.mark_used("OPENROUTER_API_KEY", SECRET, env_path=env_file, state_path=state_file, clock=clock)
+    assert providers.load_state(state_file)["records"][0]["last_used"] == 250.0
+    record = providers.load_state(state_file)["records"][0]
+    assert providers.guarded_remove(record) == "removed"
+    assert "OPENROUTER_API_KEY" not in providers.read_env_names(env_file)
+
+    # A retyped value under CRLF endings is still the operator's own credential.
+    providers.insert_key(env_file, "VISION_API_KEY", "vv", state_path=state_file, clock=clock)
+    record = providers.load_state(state_file)["records"][-1]
+    env_file.write_bytes(b"VISION_API_KEY=operator-value\r\n")
+    assert providers.guarded_remove(record) == "skipped_changed"
+    assert providers.read_env_value("VISION_API_KEY", env_path=env_file) == "operator-value"
