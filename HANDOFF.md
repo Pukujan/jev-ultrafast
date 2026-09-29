@@ -10,12 +10,6 @@ Start from repository state, not prior chat history.
 4. the active task named by CURRENT
 5. the minimum relevant specification/design document
 
-## Current task — JUF-0003 / issue #9
-
-Use branch `task/JUF-0003-frontend-qa-bootstrap`; this is a task-scoped frontend QA change. Keep the public Ultrafast agent's OpenRouter Decisions default intact. Local Laya-driven exploration is the default and required path; Jev is a separately selected comparison/alternate arm. The CLI fails closed when Laya is missing. The worker environment did not have Laya installed; do not claim live Laya acceptance or substitute Jev or a deterministic-only pass. The requested blind holdout is reviewer-owned and was not available to the implementation worker. See `tasks/TASK-JUF-0003-frontend-qa-bootstrap.md` and `docs/PDD_FRONTEND_QA.md`, `docs/SDD_FRONTEND_QA.md`, `docs/TDD_FRONTEND_QA.md`.
-
-V1 takes an already-reachable hosted or localhost URL. The operator starts local services; the CLI does not accept target repository paths or execute target commands. Playwright is the browser substrate for the selected exploration and provides supporting assertions. The current implementation has not wired the Laya/Playwright loop; it must not claim or silently substitute deterministic-only exploration. Vision is opt-in. Offline Mermaid library bundling, full provider adapters, and live target acceptance remain unresolved until verified.
-
 Before editing a GitHub task, run `continuity issue verify <TASK-ID>` and confirm the live issue is open and matches the task.
 
 ## Authority

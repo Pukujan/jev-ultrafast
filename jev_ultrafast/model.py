@@ -7,14 +7,12 @@ import time
 
 import httpx
 
-from .providers import touch_cli_key
 from .questions import NEXT_ACTION, TARGET, TEXT_VALUE
 
 CLIENT = httpx.Client(http2=True, timeout=25)
 
 
 def post_json(url, key, body):
-    touch_cli_key(key)
     for attempt in range(3):
         try:
             response = CLIENT.post(url, json=body, headers={"Authorization": f"Bearer {key}"})
@@ -80,8 +78,7 @@ def action_space(actions):
     return elements, targets, controls
 
 
-def choose(state, goal, history):
-    elements, targets, controls = action_space(state["actions"])
+def _operation_options(targets, controls):
     labels = {
         "CLICK": "Click an element, button, menu option, autocomplete suggestion, or calendar day.",
         "TYPE_TEXT": "Enter or replace text in an editable field. A small LLM will supply the value from the goal.",
@@ -90,6 +87,12 @@ def choose(state, goal, history):
     operations = {key: labels[key] for key in targets}
     operations.update({key: value["label"] for key, value in controls.items()})
     operations.update(DONE="Every requirement is visibly satisfied.", BLOCKED="No supported operation can progress.")
+    return operations
+
+
+def build_request_body(state, goal, history, model_slug=None):
+    elements, targets, controls = action_space(state["actions"])
+    operations = _operation_options(targets, controls)
     questions = {
         "operation": {"type": "choice", "criteria": operations, "instructions": {"goal": goal, "rules": NEXT_ACTION}}
     }
@@ -106,8 +109,9 @@ def choose(state, goal, history):
             },
             "instructions": {"goal": goal, "operation": operation, "rules": [NEXT_ACTION, TARGET]},
         }
-    body = {
-        "model": os.environ.get(
+    return {
+        "model": model_slug
+        or os.environ.get(
             "OPENROUTER_MODEL",
             os.environ.get("TYPESAFE_MODEL", "typesafe/jev-1.13"),
         ),
@@ -120,15 +124,31 @@ def choose(state, goal, history):
         },
         "questions": questions,
     }
-    started = time.perf_counter()
-    # Always OpenRouter Decisions first. Auth is OPENROUTER_API_KEY only.
-    # OPENROUTER_MODEL is the OpenRouter model slug in the Decisions body
-    # (e.g. typesafe/jev-1.13) — not a separate provider or TypeSafe-account path.
-    decisions_url = os.environ.get("OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions")
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY is required for Decisions; nothing executed.")
-    result = post_json(decisions_url, api_key, body)
+
+
+class OpenRouterTransport:
+    """The default path: OpenRouter Decisions, env resolved at call time, Bearer auth."""
+
+    name = "openrouter"
+
+    def prepare(self, body):
+        return body
+
+    def request(self, body):
+        # Always OpenRouter Decisions first. Auth is OPENROUTER_API_KEY only.
+        # OPENROUTER_MODEL is the OpenRouter model slug in the Decisions body
+        # (e.g. typesafe/jev-1.13) — not a separate provider or TypeSafe-account path.
+        decisions_url = os.environ.get(
+            "OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions"
+        )
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENROUTER_API_KEY is required for Decisions; nothing executed.")
+        return post_json(decisions_url, api_key, body)
+
+
+def parse_result(result, targets, controls, started):
+    operations = _operation_options(targets, controls)
     operation_answer = validate_choice(result["answers"].get("operation", {}), operations)
     operation = operation_answer["choice"]
     target = None
@@ -156,8 +176,23 @@ def choose(state, goal, history):
         "model": result["model"],
         "usage": result.get("usage", {}),
         "latency_ms": round((time.perf_counter() - started) * 1000),
-        "request": body,
     }
+
+
+def decide(transport, state, goal, history):
+    """Provider-neutral cycle: build, transport-prepare, request, parse observed targets only."""
+    started = time.perf_counter()
+    body = build_request_body(state, goal, history, model_slug=getattr(transport, "model_slug", None))
+    body = transport.prepare(body)
+    result = transport.request(body)
+    elements, targets, controls = action_space(state["actions"])
+    decision = parse_result(result, targets, controls, started)
+    decision["request"] = body
+    return decision
+
+
+def choose(state, goal, history, *, transport=None):
+    return decide(transport or OpenRouterTransport(), state, goal, history)
 
 
 def field_context(goal, action, page, history):

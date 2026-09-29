@@ -1,4 +1,4 @@
-﻿# Current Repository Checkpoint
+# Current Repository Checkpoint
 
 <!-- continuity:current {"active_task":"JUF-0003","active_task_file":"tasks/TASK-JUF-0003-frontend-qa-bootstrap.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
@@ -6,29 +6,27 @@ This is an as-of projection; live GitHub issues own progression. Leaf: [#9](http
 
 ## Program state
 
-Frontend QA terminal bootstrap is in progress. V1 accepts only already-reachable hosted or localhost URLs; local services are started by the operator. Laya-driven exploration is the default and required local path; Jev is a separately selected comparison arm. The CLI fails closed when Laya is unavailable. Its supported local `Router.predict` interface is documented, but the runtime and browser exploration loop are not ready. No Laya live acceptance was run.
+PCM overlay healthy; CGM pinned 0.5.7 @ c069613 with always-on HSW. JUF-0001 and JUF-0002 shipped and reconciled (issues #3, #7 closed). JUF-0003 frontend QA harness in progress on its task branch.
 
 ## Completed
 
-- Terminal entry point, runner defaults/fail-closed selection, static evidence, CSV/Mermaid/provenance outputs, and offline HTML report scaffold
-- Task-scoped provider-policy exception recorded
-- PDD/SDD/TDD drafts and deterministic tests added
+- JUF-0001 / #3 — PCM + CGM adoption, shipped via PR #4 (squash 1111985)
+- JUF-0002 / #7 — CGM 0.5.7 re-pin + always-on HSW, shipped via PR #8 (merge d92fcc9)
+- JUF-0003 shared surface committed (ad20dc3): contracts.py, adapter-spec.md (SDD), vendored mermaid 11.17.2 + sha256, filename legend, `jev-qa` entry point, playwright dep
 
 ## Active
 
-- JUF-0003 / #9 — implementation and validation; Grok Bot review required
+- JUF-0003 / #9 — QA harness modules under parallel implementation; PDD/TDD authored; offline test matrix; then gates, PR Refs #9, squash auto-merge
 
 ## Queued
 
-- Complete provider/key integration and offline Mermaid rendering
-- Install/verify Laya only when checkpoint/runtime availability is confirmed; run blind acceptance on both requested targets
+- Post JUF-0003 push receipt on #9 keyed by request id and SHA
+- Live acceptance runs (real Laya runtime, Playwright browsers, operator-hosted Study OS URL) — pending runtimes, tracked on #9; not claimed by this branch
 
 ## Blockers
 
-- Laya package/checkpoint absent; no Laya live acceptance yet
-- Playwright and vision judge are not configured; browser checks remain optional and vision is not run
-- Blind holdout belongs to independent reviewer and was not available to implementation worker
+Live acceptance needs localdecide installed + browsers downloaded + a hosted Study OS URL; none are available in this session yet. Implementation itself is unblocked.
 
 ## Next atomic action
 
-Complete local deterministic checks, record exact blockers, then request Grok Bot review. Do not mark issue acceptance met while live Laya and blind holdout gates remain open.
+Integrate module implementations into one tree, run `uv run ruff check . && uv run pytest && node --check jev_ultrafast/static/app.js && uv build`, reconcile docs, commit, push, open PR Refs #9, arm squash auto-merge when gates green.

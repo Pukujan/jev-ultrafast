@@ -1,9 +1,9 @@
-# Task JUF-0003 — Give operators one frontend QA command
+# TASK-JUF-0003 — Frontend QA harness for Laya
 
-<!-- continuity:task {"acceptance":["Interactive entry point accepts an already-reachable hosted URL or localhost URL","Local services are operator-started; CLI never executes target project commands","Laya guided exploration is the default and required local path; Jev is an explicit comparison/alternate arm","Playwright is the browser substrate for the selected exploration; deterministic assertions are supporting evidence, not replacement exploration","Vision is independent and optional, off by default","OpenRouter, TypeSafe and OpenCode providers are isolated and tested","Provider discovery never reads or displays secret values","CLI-inserted keys alone can expire after three idle hours","Frontend findings include reproducible browser evidence","CSV, Mermaid, provenance JSON and offline HTML report are written and opened","PDD, SDD and TDD artifacts include metamorphic, fuzz and hidden-holdout coverage","Blind Laya acceptance against Design Bakery and operator-hosted local Study OS passes or is explicitly blocked on missing Laya","Repository gates pass"],"depends_on":[],"goal":"Add terminal frontend QA modules for reachable hosted/localhost URLs with default Laya exploration, optional Jev comparison, browser evidence, optional vision, providers, and offline reports","id":"JUF-0003","issue_url":"https://github.com/Pukujan/jev-ultrafast/issues/9","next_action":"Complete the Laya-driven Playwright exploration loop and evidence pipeline; run live acceptance only after runtime prerequisites are ready","owner":"Luna worker (delegated); Grok Bot review required","priority":"high","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Operators currently need separate wrappers and lose reproducible provenance across frontend checks"} -->
+<!-- continuity:task {"acceptance":["jev-qa CLI takes URL-only targets and rejects paths with exit 2","blank or omitted runner selects laya; missing Laya runtime fails closed before any browser work; no Jev fallback","laya path reads no decision keys and sends no network decision; jev arm explicit with openrouter default provider","describe-v1 criteria flattening golden-tested; OpenRouter default path byte-identical (test_agent.py green)","key discovery names/prefixes only; watchdog deletes only the exact inserted line after 3h idle; fake-clock matrix passes","per run: defects.csv, workflow.mmd (deterministic, failing step marked), events.json, run.json with renderer sha256, offline report.html with mermaid 11.17.2","Playwright stage default-on skippable with lazy imports; vision default-off with separate VISION_* keys, never a pass; skipped/failed stages recorded honestly","PDD/SDD/TDD plus metamorphic, fuzz, hidden-holdout design committed; live AC6-AC9 runs remain open on issue #9","PR Refs #9, gates green, squash auto-merge armed"],"depends_on":[],"goal":"Ship the URL-only frontend QA harness: local Laya default runner (fail-closed), optional Jev comparison arm, skippable Playwright evidence and opt-in vision stages, offline per-run artifacts and report","id":"JUF-0003","issue_url":"https://github.com/Pukujan/jev-ultrafast/issues/9","next_action":"Integrate module implementations, run all gates, push branch, open PR Refs #9, arm squash auto-merge when gates green","owner":"Luna worker (delegated); Grok Bot review","priority":"high","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Operators need one terminal entry point for frontend QA against a reachable URL with provenance, without the tool owning target services or secrets"} -->
 
 - Status: active
-- Owner: Luna worker (delegated); Grok Bot review required
+- Owner: Luna worker (delegated by repository owner); Grok Bot required reviewer
 - Priority: high
 - Depends on: none
 - Issue: https://github.com/Pukujan/jev-ultrafast/issues/9
@@ -11,94 +11,103 @@
 
 ## Goal
 
-Let an operator provide an already-reachable hosted or localhost URL and receive an offline report from default local Laya-driven exploration. Jev is a separately selected comparison/alternate arm. Local services are started and managed by the operator; the CLI takes only the URL.
+Let an operator run frontend QA from one terminal: give a reachable URL, get
+defects.csv, workflow.mmd, run.json, and an offline report.html from a guided
+Laya exploration plus optional Playwright and vision stages.
 
-## Evidence and boundary
+## Why
 
-Issue #9 is open and names this branch and task. The owner has clarified that v1 accepts only already-reachable hosted or localhost URLs; local app services belong to the operator, and this CLI must not execute target project commands. Laya mode must use a discovered local interface, and Study OS code and private evidence stay out of this repository. No Laya executable or endpoint is present in the worker environment; live Laya acceptance is therefore a known prerequisite until discovery changes that fact.
+Study OS keeps separate Ultrafast, Playwright, and vision checks behind local
+paths; a new operator has one reusable entry point to reach. Laya gives a
+local decision runtime so the default path needs no keys and no hosted model.
 
-## Acceptance
+## Allowed files
 
-See the owning issue for full acceptance. In particular, the two-target Laya acceptance is not passed by substituting Jev. Preserve public outputs as redacted evidence only.
+- `jev_ultrafast/qa/**` (new sub-package; `model.py` seam refactor by JUF-0003 owner)
+- `jev_ultrafast/model.py` (transport seam; default behaviour byte-identical)
+- `pyproject.toml`, `uv.lock`, `.gitignore` (playwright dep, `jev-qa` script, ignored run roots)
+- `docs/qa/**`, `.content-system/filename-legends/frontend-qa.*`
+- `tests/test_qa_*.py`
+- `checkpoints/CURRENT.md`, `tasks/TASK-JUF-0003-*.md`, this task's projections
+
+## Human outcome
+
+A fresh terminal session runs `uv run jev-qa --url https://…`, accepts the
+defaults, and finishes with a browsable offline report; when Laya is missing
+the run stops before touching the browser and prints how to install it.
+
+## Scope and boundaries
+
+- In scope: URL-only CLI, laya/jev runners, provider discovery + idle key
+  cleanup, Playwright evidence stage, optional vision stage, artifacts,
+  offline report, PDD/SDD/TDD, unit/metamorphic/fuzz tests, holdout design
+- Out of scope: target repository paths, starting or stopping target
+  services, Study-os product code, live AC6–AC9 acceptance runs (runtimes
+  pending on issue #9), committing any holdout contents or credentials
+- Dependencies/uncertainty: live acceptance needs the localdecide runtime
+  installed, Playwright browsers, and an operator-hosted Study OS URL; this
+  branch claims implementation + offline tests only
+
+## Acceptance criteria
+
+- [ ] `jev-qa` takes URL-only targets; path/repo inputs rejected (exit 2)
+- [ ] Blank/omitted runner selects laya; missing runtime fails closed; no Jev fallback
+- [ ] Runner selection is provider selection; laya path uses no decision keys
+- [ ] Jev arm explicit-only; openrouter default; typesafe/opencode behind env endpoints, fail closed when unconfigured
+- [ ] describe-v1 flattening golden-tested; test_agent.py stays green untouched
+- [ ] Key discovery is name/prefix-only; watchdog deletes only the exact inserted line after 3h idle; fake-clock matrix passes
+- [ ] defects.csv/workflow.mmd/run.json/events.json byte-deterministic; report.html offline with mermaid 11.17.2 (sha256 pinned)
+- [ ] Playwright stage default-on skippable, lazy import, honest failed-setup state
+- [ ] Vision stage default-off, separate VISION_* keys, explicit off-device confirmation, never a pass
+- [ ] PDD (docs/qa/user-flow.md), SDD (docs/qa/adapter-spec.md), TDD (docs/qa/test-plan.md) committed
+- [ ] Hidden holdout authored outside the tree; receipt on issue #9; contents never committed
+- [ ] Gates green, PR Refs #9, squash auto-merge armed
+- [ ] Live runs (design-bakery + localhost Study OS via real Laya) — PENDING RUNTIME, tracked on #9
+
+## Evidence and sources
+
+- Spec: `docs/qa/adapter-spec.md` (SDD) with Laya interface verified against
+  ChenneyZhuang/laya-browser-agent @ main 2026-09-29 (serve.py, page.py,
+  decider.py)
+- Issue #9 owner corrections 2026-09-29 17:50 / 17:51 / 17:56 / 17:58 supersede
+  the issue body (URL-only; Laya default fail-closed; runner=provider)
+
+## Related records
+
+- Leaf owning issue: https://github.com/Pukujan/jev-ultrafast/issues/9 (parent: none)
+- Primary writer / branch: Luna worker / `task/JUF-0003-frontend-qa-bootstrap`
 
 ## Checkpoint log
 
-### 2026-09-29 — implementation started
+### 2026-09-29 - shared surface committed
 
 Completed:
-- Added the terminal entry point, static HTTP/link inspection, CSV, Mermaid source, provenance JSON, and offline report scaffold
-- Added the optional Playwright browser pass and the documented Laya `Router.predict` adapter boundary
-- Added PDD/SDD/TDD drafts and fake-clock/key-discovery/report tests
+- pyproject playwright dep + `jev-qa` entry point; .gitignore qa-runs/, qa-holdout/
+- contracts.py (types, provider alias table incl. vision row, constants)
+- Vendored mermaid 11.17.2 (sha256 581ed7d7…) with provenance note
+- adapter-spec.md SDD incl. describe-v1 flattening, keywatch detached-process
+  mechanism, vision credential separation, link-probe confidence rules
+- filename legend frontend-qa.md/.json; CGM adapter + writing validators VALID
 
 Evidence:
-- Live issue #9 verified open; task identity and branch match
-- `continuity validate --root .` initially failed because this checkpoint log needed its required fields; repair is pending validation
-- `uv run pytest -q` → 35 passed before the most recent changes
-- `uv run ruff check` on the changed Python files → passed; `uv run pytest -q` after key-cleanup and DOM variation coverage → 42 passed
-- `uv run python -m compileall jev_ultrafast tests`, `node --check jev_ultrafast/static/app.js`, package build, and continuity validation → passed
-- Repository-wide Ruff reports 12 lint findings only in the pre-existing untracked `full_defect_crawl.py`; that file was preserved untouched
-- Runtime discovery found neither the `laya` module nor Playwright installed. The OpenCode command exists, but the official server docs expose an OpenAPI agent server rather than this repository's typed decision endpoint.
-- Local Laya runtime absent; package interface found in upstream package documentation
+- git commit ad20dc3 holds the shared surface; `continuity validate --root .` → VALID
+- mermaid bundle re-downloaded from the exact-version URL and sha256-matched before commit
 
 Decisions:
-- Keep Laya local and fail closed; no Jev/OpenRouter fallback in Laya mode
-- Playwright is an independent optional stage; vision judging stays off unless separately requested
-- Preserve the existing OpenRouter Decisions path as default
+- Laya arm flattens dict criteria to describe-v1 strings in one shared request body
+  rather than switching to /v1/table, so validation and target mapping stay untouched
+- keywatch is a detached child process (sys.executable, absolute state path), not a thread,
+  so cleanup survives the CLI exit
+- link findings stay candidate unless the Playwright GET probe supplies status evidence;
+  the explorer never claims HTTP status
 
 Blocked/uncertain:
-- Laya package and checkpoint are not installed; required live acceptance has not run
-- Visual holdout and reviewer-owned hidden acceptance answers were not available
-- OpenCode has no tested typed-decision adapter; full provider acceptance remains incomplete
-- The current report draws an offline SVG and includes workflow.mmd; a bundled Mermaid runtime is still needed for the owner correction
-- TypeSafe and OpenCode provider request adapters are not implemented; the CLI static pass does not call any selected provider
-- Playwright is optional but absent here; browser error, screenshot, and overflow stages were not run
-- Existing untouched `full_defect_crawl.py` triggers pre-existing repository-wide Ruff failures
+- Live acceptance (real Laya model, browsers, Study OS localhost) open on #9
 
 Next:
-- Run focused tests, formatting, packaging, and validators; report the live Laya/Playwright/vision blockers without substituting runners
+- Integrate module implementations, full offline test matrix, gates, PR Refs #9
 
-### 2026-09-29 — owner clarified URL-only target scope
+## Handoff
 
-Completed:
-- Reconciled v1 to already-reachable hosted or localhost URLs; local service lifecycle is operator-owned
-- Removed target repository selection and project service startup from the CLI
-- Updated issue #9 with a superseding owner correction and aligned PDD/SDD/TDD, README, CURRENT, HANDOFF, and task projection
-
-Evidence:
-- Issue #9 correction: https://github.com/Pukujan/jev-ultrafast/issues/9#issuecomment-5895613229
-- Live acceptance was intentionally not run during this scope-only follow-up
-
-Decisions:
-- Keep Laya and Jev as separate selectable modes; keep Playwright independently optional and vision opt-in
-- Treat Laya as the required local exploration path and Jev as a distinct optional comparison arm; Playwright and vision stay independently selectable
-- Default to Laya; fail closed without a deterministic-only or Jev fallback when it is unavailable
-- Record the Gemma 3 4B and Qwen3.5 2B owner pilot/download evidence as unresolved validation, not model acceptance
-
-Blocked/uncertain:
-- All previously listed runtime, provider, hidden holdout, and live acceptance blockers remain
-
-Next:
-- Complete remaining acceptance implementation and run live targets only after required runtime and operator-provided local URL are available
-
-### 2026-09-29 14:12:50-04:00 — Codex, checkpointing Luna worker's committed increment per owner request
-
-<!-- continuity:checkpoint {"agent":"Codex, checkpointing Luna worker's committed increment per owner request","blocked":["The Laya-driven browser exploration loop and live Laya runtime are not ready; Playwright and vision validation are incomplete; no live target or blind hidden holdout was run. Keep issue #9 open."],"changed":["Added frontend QA CLI and provider adapter scaffolding, key cleanup, reports, focused tests, PDD/SDD/TDD, README/policy updates, and current/task/handoff projections."],"completed":["Operators lacked a single URL-based frontend QA entry point. Added the terminal scaffold, URL-only target intake, local Laya default with explicit Jev comparison selection, report outputs, tests, and PDD/SDD/TDD projections."],"decisions":["V1 accepts only a reachable hosted or operator-started localhost URL. Laya local exploration is the default and required path; Jev is a separate selected comparison arm. Playwright is the browser substrate, deterministic assertions support the exploration, and vision is optional and off by default."],"evidence":["Issue #9 is still OPEN and has owner corrections for URL-only scope, Laya default, Jev comparison, and vision research. Focused Ruff passed; 44 tests passed; Node syntax, package build, continuity validation, issue verification, and diff checks passed. Hosted Gemma 3 4B synthetic pilot is weak and not acceptance evidence: 8/8 sensitivity, 0/8 specificity, 2/8 exact categories; paired pilot 8/8 sensitivity, 0/2 specificity, 2/8 exact categories. Local Qwen3.5 2B pull stalled and was stopped."],"next_action":"Complete the Laya-driven Playwright exploration loop and provider/vision adapters, then run independent blind acceptance against Design Bakery and an operator-provided local Study OS URL; keep acceptance open until evidence passes.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JUF-0003","timestamp":"2026-09-29T14:12:50-04:00"} -->
-<!-- continuity:checkpoint-operation {"payload_sha256":"f46c0ab5fd25e820f21fb1ad2c73959159bb1d7dec5a87fd89ce7c12e8670e6e","request_id":"juf-0003-20260929-7f034ba1","schema":"project-continuity.checkpoint-operation.v1","task_id":"JUF-0003"} -->
-
-Completed:
-- Operators lacked a single URL-based frontend QA entry point. Added the terminal scaffold, URL-only target intake, local Laya default with explicit Jev comparison selection, report outputs, tests, and PDD/SDD/TDD projections.
-
-Evidence:
-- Issue #9 is still OPEN and has owner corrections for URL-only scope, Laya default, Jev comparison, and vision research. Focused Ruff passed; 44 tests passed; Node syntax, package build, continuity validation, issue verification, and diff checks passed. Hosted Gemma 3 4B synthetic pilot is weak and not acceptance evidence: 8/8 sensitivity, 0/8 specificity, 2/8 exact categories; paired pilot 8/8 sensitivity, 0/2 specificity, 2/8 exact categories. Local Qwen3.5 2B pull stalled and was stopped.
-
-Decisions:
-- V1 accepts only a reachable hosted or operator-started localhost URL. Laya local exploration is the default and required path; Jev is a separate selected comparison arm. Playwright is the browser substrate, deterministic assertions support the exploration, and vision is optional and off by default.
-
-Changed:
-- Added frontend QA CLI and provider adapter scaffolding, key cleanup, reports, focused tests, PDD/SDD/TDD, README/policy updates, and current/task/handoff projections.
-
-Blocked/uncertain:
-- The Laya-driven browser exploration loop and live Laya runtime are not ready; Playwright and vision validation are incomplete; no live target or blind hidden holdout was run. Keep issue #9 open.
-
-Next:
-- Complete the Laya-driven Playwright exploration loop and provider/vision adapters, then run independent blind acceptance against Design Bakery and an operator-provided local Study OS URL; keep acceptance open until evidence passes.
+Read PROJECT → CURRENT → this task → docs/qa/adapter-spec.md → issue #9
+(its owner comments override the body). Checkpoint before stopping.

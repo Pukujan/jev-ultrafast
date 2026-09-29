@@ -1,11 +1,12 @@
 .env
 .venv/
-node_modules/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
 .DS_Store
 artifacts/
 *.egg-info/
+qa-runs/
+qa-holdout/
 
 dist/

@@ -5,15 +5,15 @@ description = "A browser agent that chooses instead of generating."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
-dependencies = ["browser-harness==0.1.13", "httpx[http2]>=0.28,<1"]
+dependencies = [
+    "browser-harness==0.1.13",
+    "httpx[http2]>=0.28,<1",
+    "playwright>=1.48,<2",
+]
 
 [project.scripts]
 jev = "jev_ultrafast.demo:main"
-jev-frontend-qa = "jev_ultrafast.frontend_qa:main"
-
-[project.optional-dependencies]
-qa = ["playwright>=1.52,<2"]
-laya = ["laya>=0.3.18,<0.4"]
+jev-qa = "jev_ultrafast.qa.cli:main"
 
 [build-system]
 requires = ["hatchling"]
