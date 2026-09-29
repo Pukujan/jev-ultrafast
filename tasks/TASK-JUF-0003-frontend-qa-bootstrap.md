@@ -107,6 +107,52 @@ Blocked/uncertain:
 Next:
 - Integrate module implementations, full offline test matrix, gates, PR Refs #9
 
+### 2026-09-29 - bootstrap stream reconciled to shipped main
+
+Owner decision on issue #9 (comment 21:10Z): the harness ships on
+`task/JUF-0003-frontend-qa-impl` (PR #10, merge 656c42a); this stream
+stays untouched until its owner reconciles. That reconciliation is this
+entry. `main` is now the only frontend QA implementation.
+
+Completed:
+- Merged origin/main into this branch; kept the shipped modules and
+  retired the superseded scaffold (`frontend_qa.py`, root `providers.py`,
+  `test_frontend_qa.py`, the three docs/…_FRONTEND_QA.md drafts)
+- Fixed the three Windows-only failures the merge exposed: pid liveness
+  now queries kernel32 instead of `os.kill(pid, 0)` (WinError 87 on every
+  pid here), and an inserted key's identity moved from raw-line bytes to a
+  newline-agnostic `NAME=value` content digest, so a CRLF editor re-save
+  no longer leaves mark_used/guarded_remove behind
+- Added one deterministic regression test: same content under CRLF still
+  refreshes and removes; an operator-retyped value still does not
+
+Evidence:
+- `uv run ruff check jev_ultrafast tests` passed
+- `uv run pytest` → 209 passed, 1 skipped (206 of these run the shipped
+  suite green on this machine for the first time)
+- `node --check jev_ultrafast/static/app.js` passed; `uv build` passed;
+  `continuity validate --root .` VALID
+- Playwright 1.63 finds cached chromium-1243; the localdecide server
+  checkout exposes exactly the `/healthz` + `/v1/systemone` dialect the
+  adapter documents, defaulting to 127.0.0.1:8791
+
+Decisions:
+- No new QA surface is ported back from the scaffold; the shipped modules
+  win every overlap
+- Digest semantics are documented as content identity in the adapter spec
+  instead of byte identity, because editors change newline style without
+  changing whose credential a line is
+
+Blocked/uncertain:
+- Live AC9 runs still open: Design Bakery through the packaged Laya path,
+  operator-hosted Study OS URL, reviewer-owned hidden holdout
+- The localdecide venv install (CPU torch) was still running when this
+  entry was written
+
+Next:
+- Commit and push this reconciliation, open a PR Refs #9, then start the
+  Laya server and run the first live acceptance pass
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → docs/qa/adapter-spec.md → issue #9
