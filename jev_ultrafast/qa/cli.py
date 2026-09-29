@@ -232,16 +232,31 @@ def _run(args):
         noninteractive=yes,
     )
     context = RunContext(config=config, run_id=run_dir.name, run_dir=str(run_dir), started_at=time.time())
-    context.provenance["playwright_stage"] = "on" if playwright else "skipped"
+    if not playwright:
+        # Config-skip markers are owned by the CLI; the stages write nothing when skipped.
+        context.provenance["playwright_stage"] = "skipped"
     if vision_mode == "off":
         context.provenance["vision_stage"] = "off"
 
     if runner == RUNNER_LAYA:
         decider = laya.laya_decider()
         if isinstance(laya_info, dict):
-            for key in ("backend", "model", "max_options_per_question"):
+            for key in ("backend", "max_options_per_question"):
                 if laya_info.get(key) is not None:
                     context.provenance[key] = laya_info[key]
+            models = laya_info.get("models") or []
+            backend = laya_info.get("backend")
+            # /v1/models often echoes the backend name; only a distinct value
+            # is worth recording next to it.
+            if models and models[0] != backend:
+                context.provenance["model"] = models[0]
+        if "model" not in context.provenance:
+            slug = getattr(decider, "model_slug", None) or getattr(
+                getattr(decider, "transport", None), "model_slug", None
+            )
+            if slug:
+                # healthz names no model; record what the transport actually sends.
+                context.provenance["model"] = slug
     else:
         decider = _import("jev_runner").jev_decider(provider)
         if getattr(decider, "name", None):
@@ -252,31 +267,52 @@ def _run(args):
     try:
         terminal = Explorer(config, context, decider=decider).run()
         say(f"Exploration finished: {terminal}.")
+        if terminal == "browser_error" and not context.events:
+            # The target never opened: a setup failure, not a site defect.
+            reason = context.provenance.get("explorer_open_error", "unknown error")
+            say(f"Could not open {url} ({reason}). Check that the URL is reachable and try again.")
+            return 2
         if config.playwright:
             _import("playwright_stage").PlaywrightStage().run(context)
         if config.vision_mode != "off":
             _import("vision_stage").VisionStage().run(context)
-        keywatch = _import("keywatch")
+        artifacts = _import("artifacts")
+        artifacts.write_events(run_dir, context.events)
+        artifacts.write_workflow(run_dir, context.events, terminal=context.provenance.get("explorer_terminal"))
+        artifacts.write_defects(run_dir, context.findings)
+        report = _import("report")
+        report.build_report(run_dir, context)
+        # run.json hashes the folder as its evidence index, so it goes last:
+        # report.html and the renderer copies must already exist.
+        artifacts.write_run(run_dir, context)
+        if not args.no_browser:
+            report.open_report(run_dir)
+    except Exception as exc:
+        context.provenance["run_error"] = str(exc)[:200]
         try:
-            summary = keywatch.reconcile(state_path)
-        except Exception as exc:
-            say(f"Keywatch reconciliation failed: {exc}")
-            return 2
+            artifacts = _import("artifacts")
+            artifacts.write_events(run_dir, context.events)
+            artifacts.write_workflow(run_dir, context.events, terminal=context.provenance.get("explorer_terminal"))
+            artifacts.write_defects(run_dir, context.findings)
+            artifacts.write_run(run_dir, context)
+        except Exception:
+            pass
+        say(f"Run failed: {exc}")
+        return 1
+    # Key-ledger housekeeping is order-independent cleanup: a stuck watcher ledger
+    # must never discard a completed run's evidence, nor change its exit code.
+    try:
+        keywatch = _import("keywatch")
+        summary = keywatch.reconcile(state_path)
         # reconcile respawns a missing watcher for actionable records; spawn here
         # only when a fresh insert needs one and reconcile left none running.
         if new_key_inserted and not opted_out and not (summary or {}).get("watcher_pid"):
             keywatch.spawn_watcher(state_path)
-        artifacts = _import("artifacts")
-        artifacts.write_events(run_dir, context.events)
-        artifacts.write_workflow(run_dir, context.events)
-        artifacts.write_defects(run_dir, context.findings)
-        artifacts.write_run(run_dir, context)
-        report = _import("report")
-        report.build_report(run_dir, context)
-        if not args.no_browser:
-            report.open_report(run_dir)
     except Exception as exc:
-        say(f"Run failed: {exc}")
-        return 1
+        say(f"Keywatch cleanup failed; the run's evidence is unaffected: {exc}")
     say(f"Report saved to {run_dir}.")
     return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

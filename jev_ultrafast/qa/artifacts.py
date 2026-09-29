@@ -47,7 +47,16 @@ RENDERER_SOURCE = "jev_ultrafast/qa/assets/mermaid.INFO.txt"
 
 # Provenance keys allowed into run.json, by expected type. Anything else
 # in context.provenance is dropped, never echoed.
-PROVENANCE_TEXT_KEYS = ("backend", "model", "laya_criteria_flattening", "tracing_mode")
+PROVENANCE_TEXT_KEYS = (
+    "backend",
+    "model",
+    "laya_criteria_flattening",
+    "tracing_mode",
+    "vision_model",
+    "vision_provider",
+    "run_error",
+    "explorer_terminal",
+)
 PROVENANCE_INT_KEYS = ("max_options_per_question",)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -101,7 +110,20 @@ def _event_label(event: PageEvent) -> str:
     return " ".join(parts)
 
 
-def _outcome(events: list[PageEvent]) -> str:
+# Explorer-recorded terminal reasons (explorer.py owns the values); the
+# chart renders them verbatim instead of re-deriving from step counts.
+_TERMINAL_LABELS = {
+    "done": "done",
+    "blocked": "blocked",
+    "max_steps": "steps-limit",
+    "decider_exhausted": "decider-exhausted",
+    "browser_error": "browser-error",
+}
+
+
+def _outcome(events: list[PageEvent], terminal: str | None) -> str:
+    if terminal in _TERMINAL_LABELS:
+        return _TERMINAL_LABELS[terminal]
     if not events or any(event.error for event in events) or not events[-1].executed:
         return "blocked"
     if len(events) >= DEFAULT_MAX_STEPS:
@@ -109,8 +131,8 @@ def _outcome(events: list[PageEvent]) -> str:
     return "done"
 
 
-def render_workflow(events: Iterable[PageEvent]) -> str:
-    """Render the Mermaid chart for a run. Pure function of the event list."""
+def render_workflow(events: Iterable[PageEvent], terminal: str | None = None) -> str:
+    """Render the Mermaid chart for a run. Pure function of events plus terminal."""
     events = list(events)
     failing = [event for event in events if event.failing]
     lines = ["flowchart TD"]
@@ -119,7 +141,7 @@ def render_workflow(events: Iterable[PageEvent]) -> str:
     counts = f"{len(events)} step" + ("s" if len(events) != 1 else "")
     if failing:
         counts += f", {len(failing)} failing"
-    lines.append(f'    T(["{_escape_mermaid(f"{_outcome(events)} ({counts})")}"])')
+    lines.append(f'    T(["{_escape_mermaid(f"{_outcome(events, terminal)} ({counts})")}"])')
     for first, second in zip(events, events[1:]):
         lines.append(f"    S{first.step} --> S{second.step}")
     if events:
@@ -131,9 +153,9 @@ def render_workflow(events: Iterable[PageEvent]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def write_workflow(run_dir: Path | str, events: Iterable[PageEvent]) -> Path:
+def write_workflow(run_dir: Path | str, events: Iterable[PageEvent], terminal: str | None = None) -> Path:
     path = Path(run_dir) / ARTIFACT_WORKFLOW
-    _write_text(path, render_workflow(events))
+    _write_text(path, render_workflow(events, terminal))
     return path
 
 
@@ -175,7 +197,13 @@ def write_defects(run_dir: Path | str, findings: Iterable[Finding]) -> Path:
 def playwright_stage_status(context: RunContext) -> str:
     if not context.config.playwright:
         return "skipped"
-    return "failed-setup" if context.provenance.get("playwright_stage") == "failed-setup" else "on"
+    marker = context.provenance.get("playwright_stage")
+    if marker == "failed-setup":
+        return "failed-setup"
+    if marker == "on":
+        return "on"
+    # No marker means the stage never recorded a result. Never claim it ran.
+    return "not-run"
 
 
 def vision_stage_status(context: RunContext) -> str:
@@ -185,11 +213,13 @@ def vision_stage_status(context: RunContext) -> str:
     if raw in ("declined", "skipped-no-model"):
         return raw
     if raw == "ran":
+        recorded = context.provenance.get("vision_reviewed")
+        if isinstance(recorded, int) and not isinstance(recorded, bool):
+            return f"ran({recorded})"
         count = sum(1 for finding in context.findings if finding.stage == "vision")
         return f"ran({count})"
-    # Requested but no recorded status: nothing ran and nothing left the
-    # machine, so record the conservative non-pass value.
-    return "declined"
+    # Requested but the stage recorded nothing: keep the honest non-pass value.
+    return "not-run"
 
 
 def stage_table(context: RunContext) -> dict[str, str]:
@@ -229,7 +259,8 @@ def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _evidence_index(run_dir: Path) -> dict[str, str]:
+def evidence_index(run_dir: Path) -> dict[str, str]:
+    """sha256 per run-folder file (except run.json), sorted relative POSIX paths."""
     index = {}
     paths = sorted(p for p in run_dir.rglob("*") if p.is_file() and p.name != ARTIFACT_RUN)
     for path in paths:
@@ -267,7 +298,7 @@ def run_summary(context: RunContext, run_dir: Path | str) -> dict:
         },
         "tool": {"python": platform.python_version(), "package": PACKAGE_VERSION, "git": _git_sha()},
         "provenance": provenance,
-        "evidence": _evidence_index(run_dir),
+        "evidence": evidence_index(run_dir),
     }
 
 

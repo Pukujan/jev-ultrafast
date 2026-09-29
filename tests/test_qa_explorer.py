@@ -132,6 +132,7 @@ def test_broken_link_landing_stays_candidate(tmp_path):
     assert 'step 1: CLICK [2] "About"' in finding.action
     assert "HTTP status" in finding.detail
     assert context.events[0].page_changed is True
+    assert context.events[0].failing is True
 
 
 @pytest.mark.parametrize("title,text", [
@@ -147,6 +148,31 @@ def test_error_page_patterns_raise_broken_link(tmp_path, title, text):
     exp.run()
     assert [finding.kind for finding in context.findings] == ["broken_link"]
 
+
+def test_http_server_style_error_body_is_detected(tmp_path):
+    start = make_page(fingerprint="fp-a")
+    landing = make_page(
+        url="https://example.test/missing.html",
+        title="Error response",
+        text="Error code: 404. Message: File not found.",
+        fingerprint="fp-b",
+    )
+    exp, context, _, _ = build(tmp_path, [start, landing], [click("e2", "2"), {"operation": "DONE"}])
+    exp.run()
+    assert [finding.kind for finding in context.findings] == ["broken_link"]
+
+
+@pytest.mark.parametrize("title,text", [
+    ("Pricing", "Over 500 plans and growing."),
+    ("Search results", "No matches. Not found in our catalog."),
+    ("About", "Serving 502 customers since 2020."),
+])
+def test_healthy_pages_mentioning_statuses_are_not_flagged(tmp_path, title, text):
+    start = make_page(fingerprint="fp-a")
+    landing = make_page(url="https://example.test/next", title=title, text=text, fingerprint="fp-b")
+    exp, context, _, _ = build(tmp_path, [start, landing], [click("e2", "2"), {"operation": "DONE"}])
+    exp.run()
+    assert context.findings == []
 
 def test_large_numbers_in_copy_are_not_an_error_page(tmp_path):
     start = make_page(fingerprint="fp-a")
@@ -171,19 +197,20 @@ def test_act_exception_records_browser_error_candidate(tmp_path):
     event = context.events[-1]
     assert event.executed is False
     assert "CDP session closed" in event.error
+    assert event.failing is True
     assert browser.closed
 
 
-def test_first_observation_failure_records_browser_error(tmp_path):
+def test_first_observation_failure_is_a_setup_error(tmp_path):
     exp, context, _, decider = build(tmp_path, [], [click()])
     assert exp.run() == "browser_error"
-    assert context.findings[0].kind == "browser_error"
-    assert context.findings[0].action == "open target"
+    assert context.findings == []
     assert context.events == []
     assert decider.states == []
+    assert "RuntimeError" in context.provenance["explorer_open_error"]
 
 
-def test_browser_factory_failure_is_a_browser_error(tmp_path):
+def test_browser_factory_failure_is_a_setup_error(tmp_path):
     config = RunConfig(target_url="https://example.test/")
     context = RunContext(config=config, run_id="run", run_dir=str(tmp_path), started_at=0.0)
 
@@ -192,7 +219,9 @@ def test_browser_factory_failure_is_a_browser_error(tmp_path):
 
     exp = explorer_mod.Explorer(config, context, browser_factory=factory, decider=FakeDecider([]))
     assert exp.run() == "browser_error"
-    assert context.findings[0].kind == "browser_error"
+    assert context.findings == []
+    assert "daemon unreachable" in context.provenance["explorer_open_error"]
+    assert context.provenance["explorer_terminal"] == "browser_error"
 
 
 @pytest.mark.parametrize("word", ["DONE", "BLOCKED"])

@@ -240,7 +240,12 @@ def test_explorer_fuzz_invariants(tmp_path):
         actual = [f for f in context.findings if f.kind == "dead_control"]
         actual_steps = [int(STEP_RE.match(f.action).group(1)) for f in actual]
         assert actual_steps == expected_dead_controls(case, context.events)
-        assert [e.step for e in context.events if e.failing] == actual_steps
+        cited = set()
+        for finding in context.findings:
+            match = STEP_RE.match(finding.action)
+            if match:
+                cited.add(int(match.group(1)))
+        assert {e.step for e in context.events if e.failing} == cited
         if case["pattern"] == "changing":
             assert actual == []
 

@@ -139,6 +139,19 @@ def test_workflow_terminal_outcomes():
     assert f"steps-limit ({DEFAULT_MAX_STEPS} steps)" in capped
 
 
+def test_workflow_terminal_reason_from_explorer(tmp_path):
+    short = [event(step) for step in range(1, 8)]
+    assert "steps-limit (7 steps)" in artifacts.render_workflow(short, terminal="max_steps")
+    pair = [event(1), event(2)]
+    assert "decider-exhausted (2 steps)" in artifacts.render_workflow(pair, terminal="decider_exhausted")
+    assert "browser-error (2 steps)" in artifacts.render_workflow(pair, terminal="browser_error")
+    assert "blocked (2 steps)" in artifacts.render_workflow(pair, terminal="blocked")
+    assert "done (2 steps)" in artifacts.render_workflow(pair, terminal="done")
+    assert "done (2 steps)" in artifacts.render_workflow(pair, terminal="unknown-future-value")
+    artifacts.write_workflow(tmp_path, short, terminal="max_steps")
+    assert "steps-limit (7 steps)" in (tmp_path / "workflow.mmd").read_text(encoding="utf-8")
+
+
 def test_events_json_keeps_field_order_and_is_stable(tmp_path):
     a, b = tmp_path / "a", tmp_path / "b"
     a.mkdir()
@@ -206,6 +219,11 @@ def test_run_json_whitelist_keeps_hostile_provenance_out(tmp_path):
         "model": "laya-8b",
         "laya_criteria_flattening": "describe-v1",
         "max_options_per_question": 12,
+        "playwright_stage": "on",
+        "run_error": "explorer stopped: element e9 vanished mid-step",
+        "explorer_terminal": "done",
+        "vision_model": "qwen3-vl-235b",
+        "vision_provider": "openrouter",
         "OPENROUTER_API_KEY": secrets[0],
         "api_key": secrets[1],
         "notes": {"deep": secrets[2]},
@@ -246,6 +264,10 @@ def test_run_json_whitelist_keeps_hostile_provenance_out(tmp_path):
         "model": "laya-8b",
         "laya_criteria_flattening": "describe-v1",
         "max_options_per_question": 12,
+        "run_error": "explorer stopped: element e9 vanished mid-step",
+        "explorer_terminal": "done",
+        "vision_model": "qwen3-vl-235b",
+        "vision_provider": "openrouter",
     }
     assert data["renderer"] == {
         "version": MERMAID_VERSION,
@@ -282,8 +304,10 @@ def test_run_json_tolerates_missing_git(tmp_path, monkeypatch):
 
 
 def test_stage_table_variants(tmp_path):
-    base = make_context(tmp_path)
-    assert artifacts.stage_table(base) == {"playwright": "on", "vision": "off"}
+    completed = make_context(tmp_path, provenance={"playwright_stage": "on"})
+    assert artifacts.stage_table(completed) == {"playwright": "on", "vision": "off"}
+    no_marker = make_context(tmp_path)
+    assert artifacts.stage_table(no_marker) == {"playwright": "not-run", "vision": "off"}
     skipped = make_context(tmp_path, playwright=False)
     assert artifacts.playwright_stage_status(skipped) == "skipped"
     failed = make_context(tmp_path, provenance={"playwright_stage": "failed-setup"})
@@ -299,8 +323,15 @@ def test_stage_table_variants(tmp_path):
         provenance={"vision_stage": "ran"},
     )
     assert artifacts.vision_stage_status(ran) == "ran(1)"
+    reviewed = make_context(
+        tmp_path,
+        findings=[finding("D001", stage="vision", kind="visual", status="candidate")],
+        vision_mode="openrouter",
+        provenance={"vision_stage": "ran", "vision_reviewed": 3},
+    )
+    assert artifacts.vision_stage_status(reviewed) == "ran(3)"
     unrecorded = make_context(tmp_path, vision_mode="ollama")
-    assert artifacts.vision_stage_status(unrecorded) == "declined"
+    assert artifacts.vision_stage_status(unrecorded) == "not-run"
 
 
 # --- metamorphic ----------------------------------------------------------

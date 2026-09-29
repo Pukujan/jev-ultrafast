@@ -40,6 +40,7 @@ _PLAYWRIGHT_LINES = {
     "on": "playwright evidence recorded",
     "skipped": "playwright skipped for this run",
     "failed-setup": "playwright setup failed, so browser evidence is missing",
+    "not-run": "the run stopped before the evidence stage",
 }
 
 _STYLE = """\
@@ -74,13 +75,26 @@ def _banner(findings: list[Finding]) -> str:
     return text
 
 
-def _vision_line(status: str, findings: list[Finding]) -> str:
+def _vision_line(status: str, findings: list[Finding], provenance: dict) -> str:
     if status.startswith("ran"):
         count = sum(1 for f in findings if f.stage == "vision")
+        detail = ""
+        provider = provenance.get("vision_provider")
+        model = provenance.get("vision_model")
+        if isinstance(provider, str) and provider and isinstance(model, str) and model:
+            detail = f" via {provider} {model}"
+        elif isinstance(provider, str) and provider:
+            detail = f" via {provider}"
+        elif isinstance(model, str) and model:
+            detail = f" via {model}"
         if count == 0:
-            return "vision ran and added no findings"
+            return f"vision ran{detail} and added no findings"
         noun = "finding" if count == 1 else "findings"
-        return f"vision ran and added {count} {noun}"
+        return f"vision ran{detail} and added {count} {noun}"
+    if status == "declined":
+        return "vision was offered and declined"
+    if status == "skipped-no-model":
+        return "vision skipped: no local vision model installed"
     return "vision not run"
 
 
@@ -177,7 +191,7 @@ def _render_html(context: RunContext, run_info: dict, mmd: str, csv_text: str) -
     host = urlparse(context.config.target_url).hostname or context.config.target_url
     stages = run_info.get("stages") or {}
     playwright_line = _PLAYWRIGHT_LINES.get(stages.get("playwright", ""), "playwright status unknown")
-    vision_line = _vision_line(stages.get("vision", "off"), findings)
+    vision_line = _vision_line(stages.get("vision", "off"), findings, run_info.get("provenance") or {})
     runner_line = f"Runner {run_info.get('runner') or context.config.runner}"
     if run_info.get("provider"):
         runner_line += f" with provider {run_info['provider']}"
@@ -234,6 +248,18 @@ def _render_html(context: RunContext, run_info: dict, mmd: str, csv_text: str) -
     return "\n".join(parts) + "\n"
 
 
+def _reindex_run_evidence(run_dir: Path) -> None:
+    """Re-hash the folder so run.json can vouch for report.html and the renderer copies."""
+    run_path = run_dir / ARTIFACT_RUN
+    if not run_path.exists():
+        return
+    run_info = json.loads(run_path.read_text(encoding="utf-8"))
+    run_info["evidence"] = artifacts.evidence_index(run_dir)
+    with open(run_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(run_info, handle, indent=2)
+        handle.write("\n")
+
+
 def build_report(run_dir: Path | str, context: RunContext) -> Path:
     """Copy the renderer, then write report.html from the run folder's artifacts."""
     run_dir = Path(run_dir)
@@ -243,7 +269,7 @@ def build_report(run_dir: Path | str, context: RunContext) -> Path:
     if workflow_path.exists():
         mmd = workflow_path.read_text(encoding="utf-8")
     else:
-        mmd = artifacts.render_workflow(context.events)
+        mmd = artifacts.render_workflow(context.events, context.provenance.get("explorer_terminal"))
     run_path = run_dir / ARTIFACT_RUN
     if run_path.exists():
         run_info = json.loads(run_path.read_text(encoding="utf-8"))
@@ -254,6 +280,7 @@ def build_report(run_dir: Path | str, context: RunContext) -> Path:
     report_path = run_dir / ARTIFACT_REPORT
     with open(report_path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(_render_html(context, run_info, mmd, csv_text))
+    _reindex_run_evidence(run_dir)
     return report_path
 
 

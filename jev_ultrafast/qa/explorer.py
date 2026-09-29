@@ -16,7 +16,7 @@ from ..browser import Browser
 from ..model import action_space
 from .contracts import RUNNER_LAYA, STATUS_CANDIDATE, PageEvent
 
-_ERROR_PAGE_PATTERNS = tuple(
+_TITLE_ERROR_PATTERNS = tuple(
     re.compile(pattern)
     for pattern in (
         r"\b404\b",
@@ -27,6 +27,20 @@ _ERROR_PAGE_PATTERNS = tuple(
         r"\b502\b",
         r"\bbad gateway\b",
         r"\b503\b",
+        r"\bservice unavailable\b",
+    )
+)
+# Body copy mentions "500" and "not found" on healthy pages; only compound
+# error phrases are specific enough to come from page text.
+_TEXT_ERROR_PATTERNS = tuple(
+    re.compile(pattern)
+    for pattern in (
+        r"\bpage not found\b",
+        r"\bfile not found\b",
+        r"\berror code:\s*404\b",
+        r"\binternal server error\b",
+        r"\bserver error\b",
+        r"\bbad gateway\b",
         r"\bservice unavailable\b",
     )
 )
@@ -57,8 +71,11 @@ def _action_text(step, operation, target, label):
 
 
 def _looks_like_error_page(page):
-    content = f'{page.get("title", "")}\n{page.get("text", "")}'.lower()
-    return any(pattern.search(content) for pattern in _ERROR_PAGE_PATTERNS)
+    title = page.get("title", "").lower()
+    text = page.get("text", "").lower()
+    return any(p.search(title) for p in _TITLE_ERROR_PATTERNS) or any(
+        p.search(text) for p in _TEXT_ERROR_PATTERNS
+    )
 
 
 class Explorer:
@@ -102,26 +119,16 @@ class Explorer:
         try:
             browser = self.browser_factory(config.target_url)
         except Exception as exc:
-            record(
-                "browser_error",
-                config.target_url,
-                "open target",
-                f"Opening {config.target_url} failed: {type(exc).__name__}: {exc}",
-                0.0,
-            )
+            # A target that never opened is a setup failure, not a site defect:
+            # no finding, so the CLI fails closed with exit 2.
+            self.context.provenance["explorer_open_error"] = f"{type(exc).__name__}: {exc}"[:200]
             self._finish("browser_error")
             return "browser_error"
         try:
             try:
                 page = browser.observe(screenshot=False)
             except Exception as exc:
-                record(
-                    "browser_error",
-                    config.target_url,
-                    "open target",
-                    f"Opening {config.target_url} failed: {type(exc).__name__}: {exc}",
-                    0.0,
-                )
+                self.context.provenance["explorer_open_error"] = f"{type(exc).__name__}: {exc}"[:200]
                 terminal = "browser_error"
             else:
                 terminal = self._walk(browser, page, goal, record)
@@ -192,60 +199,62 @@ class Explorer:
             try:
                 browser.act(action, page, text=text or None)
             except Exception as exc:
-                context.add_event(
-                    PageEvent(
-                        step=step,
-                        timestamp_ms=_now_ms(),
-                        url=page["url"],
-                        title=page.get("title", ""),
-                        operation=operation,
-                        target=target,
-                        label=label,
-                        action_id=action["id"],
-                        executed=False,
-                        page_changed=False,
-                        fingerprint=page.get("fingerprint", ""),
-                        runner=config.runner,
-                        confidence=confidence,
-                        error=f"{type(exc).__name__}: {exc}",
-                    )
+                event = PageEvent(
+                    step=step,
+                    timestamp_ms=_now_ms(),
+                    url=page["url"],
+                    title=page.get("title", ""),
+                    operation=operation,
+                    target=target,
+                    label=label,
+                    action_id=action["id"],
+                    executed=False,
+                    page_changed=False,
+                    fingerprint=page.get("fingerprint", ""),
+                    runner=config.runner,
+                    confidence=confidence,
+                    error=f"{type(exc).__name__}: {exc}",
                 )
-                record(
+                context.add_event(event)
+                finding = record(
                     "browser_error",
                     page["url"],
                     action_text,
                     f"Executing {action_text} raised {type(exc).__name__}: {exc}",
                     confidence,
                 )
+                if finding is not None:
+                    event.failing = True
                 return "browser_error"
             try:
                 fresh = browser.observe(screenshot=False)
             except Exception as exc:
-                context.add_event(
-                    PageEvent(
-                        step=step,
-                        timestamp_ms=_now_ms(),
-                        url=page["url"],
-                        title=page.get("title", ""),
-                        operation=operation,
-                        target=target,
-                        label=label,
-                        action_id=action["id"],
-                        executed=True,
-                        page_changed=False,
-                        fingerprint=page.get("fingerprint", ""),
-                        runner=config.runner,
-                        confidence=confidence,
-                        error=f"re-observe failed: {type(exc).__name__}: {exc}",
-                    )
+                event = PageEvent(
+                    step=step,
+                    timestamp_ms=_now_ms(),
+                    url=page["url"],
+                    title=page.get("title", ""),
+                    operation=operation,
+                    target=target,
+                    label=label,
+                    action_id=action["id"],
+                    executed=True,
+                    page_changed=False,
+                    fingerprint=page.get("fingerprint", ""),
+                    runner=config.runner,
+                    confidence=confidence,
+                    error=f"re-observe failed: {type(exc).__name__}: {exc}",
                 )
-                record(
+                context.add_event(event)
+                finding = record(
                     "browser_error",
                     page["url"],
                     action_text,
                     f"Observing after {action_text} raised {type(exc).__name__}: {exc}",
                     confidence,
                 )
+                if finding is not None:
+                    event.failing = True
                 return "browser_error"
 
             changed = fresh["fingerprint"] != page["fingerprint"]
@@ -280,7 +289,7 @@ class Explorer:
             )
 
             if fresh["url"] != page["url"] and _looks_like_error_page(fresh):
-                record(
+                finding = record(
                     "broken_link",
                     fresh["url"],
                     action_text,
@@ -288,6 +297,8 @@ class Explorer:
                     "The explorer cannot see HTTP status; the Playwright stage corroborates.",
                     confidence,
                 )
+                if finding is not None:
+                    event.failing = True
 
             if action["kind"] == "click" and pending is None:
                 pending = {

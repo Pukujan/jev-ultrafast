@@ -112,10 +112,14 @@ def speakable_phrase(title: str, fallback: str = "untitled page") -> str:
     return " ".join(words) or fallback
 
 
-def visited_urls(events: list[contracts.PageEvent], limit: int = MAX_VISITED_URLS) -> list[str]:
-    """Dedupe the exploration's visited URLs, first-seen order, capped."""
+def visited_urls(events: list[contracts.PageEvent], target_url: str | None = None,
+                 limit: int = MAX_VISITED_URLS) -> list[str]:
+    """Visited URLs: the entry page seeds first, then the exploration's, deduped and capped."""
     ordered: list[str] = []
     seen: set[str] = set()
+    if target_url:
+        ordered.append(target_url)
+        seen.add(target_url)
     for event in events:
         if event.url and event.url not in seen:
             seen.add(event.url)
@@ -190,9 +194,7 @@ class PlaywrightStage:
             context.provenance["playwright_error"] = str(exc)
 
     def _sweep(self, context: contracts.RunContext) -> None:
-        urls = visited_urls(context.events)
-        if not urls:
-            urls = [context.config.target_url]
+        urls = visited_urls(context.events, context.config.target_url)
         step_by_url: dict[str, int] = {}
         for event in context.events:
             step_by_url.setdefault(event.url, event.step)

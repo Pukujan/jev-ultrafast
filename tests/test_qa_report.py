@@ -3,6 +3,7 @@
 import dataclasses
 import hashlib
 import html
+import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -121,6 +122,19 @@ def test_report_never_says_pass(tmp_path):
     assert "pass" not in empty_text.lower()
 
 
+def test_build_report_reindexes_run_json_evidence(tmp_path):
+    run_dir, context = built_run(tmp_path)
+    before = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))["evidence"]
+    assert "report.html" not in before
+    assert "mermaid.min.js" not in before
+    report.build_report(run_dir, context)
+    after = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))["evidence"]
+    for name in ("report.html", "mermaid.min.js", "mermaid.INFO.txt", "defects.csv", "events.json", "workflow.mmd"):
+        assert name in after
+    assert after["report.html"] == hashlib.sha256((run_dir / "report.html").read_bytes()).hexdigest()
+    assert after["mermaid.min.js"] == hashlib.sha256((run_dir / "mermaid.min.js").read_bytes()).hexdigest()
+
+
 def test_report_banner_counts(tmp_path):
     run_dir, context = built_run(tmp_path)
     text = report.build_report(run_dir, context).read_text(encoding="utf-8")
@@ -144,15 +158,22 @@ def test_report_vision_lines(tmp_path):
         provenance={"vision_stage": "declined"},
     )
     declined_text = report.build_report(declined_run, declined_ctx).read_text(encoding="utf-8")
-    assert "vision not run" in declined_text
+    assert "vision was offered and declined" in declined_text
+    no_model_run, no_model_ctx = built_run(
+        tmp_path / "nomodel",
+        vision_mode="ollama",
+        provenance={"vision_stage": "skipped-no-model"},
+    )
+    no_model_text = report.build_report(no_model_run, no_model_ctx).read_text(encoding="utf-8")
+    assert "vision skipped: no local vision model installed" in no_model_text
     ran_run, ran_ctx = built_run(
         tmp_path / "ran",
         findings=[finding("D001"), finding("D002", stage="vision", kind="visual", status="candidate")],
         vision_mode="openrouter",
-        provenance={"vision_stage": "ran"},
+        provenance={"vision_stage": "ran", "vision_provider": "openrouter", "vision_model": "qwen3-vl-235b"},
     )
     ran_text = report.build_report(ran_run, ran_ctx).read_text(encoding="utf-8")
-    assert "vision ran and added 1 finding" in ran_text
+    assert "vision ran via openrouter qwen3-vl-235b and added 1 finding" in ran_text
 
 
 def test_report_defect_anchors_and_failing_step_links(tmp_path):

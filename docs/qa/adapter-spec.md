@@ -279,10 +279,17 @@ Opt-in, default off, suggestions only.
 - `run.json`: run_id, started/finished ISO times, target, runner, provider
   or null, model/backend from the decision transport (laya: healthz
   `backend`, model name; never any key), stage table
-  (`{playwright: on|skipped|failed-setup, vision: off|declined|ran}`),
-  step and finding counts by status, renderer provenance
-  (`mermaid 11.17.2 sha256 581ed7d7…`), tool versions, git sha, evidence
-  sha256 index
+  {playwright: on | skipped | failed-setup | not-run, vision: off |
+  declined | skipped-no-model | ran(N) | not-run}. A stage that never
+  recorded a result is not-run, never a claimed on/declined. Then step
+  and finding counts by status, run_error text on crash paths, renderer
+  provenance (mermaid 11.17.2 sha256 581ed7d7…), tool versions, git sha,
+  evidence sha256 index
+
+Crash path: if the run raises mid-flight, the CLI still writes events,
+workflow, defects, and run.json (best effort) with `run_error`, then
+exits 1 without building or opening report.html. A failed run is a
+recorded run, never a silent folder.
 
 ## Report (`report.py`)
 

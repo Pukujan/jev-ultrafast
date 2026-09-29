@@ -25,26 +25,30 @@ class FakeExplorer:
     def run(self):
         f = CURRENT["f"]
         f.names.append("explorer.run")
-        for step, fingerprint in enumerate(f.event_fingerprints, start=1):
-            self.context.add_event(
-                PageEvent(
-                    step=step,
-                    timestamp_ms=1000 + step,
-                    url=RUN_URL,
-                    title="Home",
-                    operation="CLICK",
-                    target="1",
-                    label="Sign in",
-                    action_id="e1",
-                    executed=True,
-                    page_changed=True,
-                    fingerprint=fingerprint,
-                    runner=self.config.runner,
-                    confidence=0.9,
+        terminal = getattr(f, "terminal", "done")
+        if getattr(f, "add_events", True):
+            for step, fingerprint in enumerate(f.event_fingerprints, start=1):
+                self.context.add_event(
+                    PageEvent(
+                        step=step,
+                        timestamp_ms=1000 + step,
+                        url=RUN_URL,
+                        title="Home",
+                        operation="CLICK",
+                        target="1",
+                        label="Sign in",
+                        action_id="e1",
+                        executed=True,
+                        page_changed=True,
+                        fingerprint=fingerprint,
+                        runner=self.config.runner,
+                        confidence=0.9,
+                    )
                 )
-            )
-        self.context.provenance["explorer_terminal"] = "done"
-        return "done"
+        self.context.provenance["explorer_terminal"] = terminal
+        if terminal == "browser_error":
+            self.context.provenance["explorer_open_error"] = "RuntimeError: injected open failure"
+        return terminal
 
 
 @pytest.fixture
@@ -57,12 +61,14 @@ def fake(monkeypatch):
     f.calls = []
     f.explorers = []
     f.inputs = None
-    f.discover_result = {"backend": "mlx", "model": "laya-mini", "max_options_per_question": 8}
+    f.discover_result = {"backend": "mlx", "max_options_per_question": 8, "models": ["laya-mini"]}
     f.discover_error = None
     f.candidates = []
     f.confirm_answer = True
     f.reconcile_summary = {"watcher_pid": None}
     f.event_fingerprints = ["fp-1", "fp-2", "fp-3"]
+    f.terminal = "done"
+    f.add_events = True
 
     def rec(name, result=None):
         def call(*args, **kwargs):
@@ -87,7 +93,18 @@ def fake(monkeypatch):
     f.LayaUnavailable = LayaUnavailable
     laya.LayaUnavailable = LayaUnavailable
     laya.discover = discover
-    laya.laya_decider = rec("laya.laya_decider", lambda: "laya-decider")
+    class LayaTransportStub:
+        name = "laya"
+        model_slug = "localdecide"
+
+    class LayaDeciderStub:
+        name = "laya"  # the real LayaDecider carries no model_slug; its transport does
+
+        def __init__(self):
+            self.transport = LayaTransportStub()
+
+    f.LayaDeciderStub = LayaDeciderStub
+    laya.laya_decider = rec("laya.laya_decider", lambda: LayaDeciderStub())
 
     providers = types.ModuleType("jev_ultrafast.qa.providers")
     providers.discover = rec("providers.discover", lambda: list(f.candidates))
@@ -113,6 +130,7 @@ def fake(monkeypatch):
     class PlaywrightStage:
         def run(self, context):
             f.names.append("playwright_stage.run")
+            context.provenance["playwright_stage"] = "on"  # the real stage writes its own marker
 
     playwright_stage.PlaywrightStage = PlaywrightStage
 
@@ -165,7 +183,7 @@ def test_absent_runner_defaults_to_laya_without_openrouter_key(fake, monkeypatch
     explorer = fake.explorers[0]
     assert explorer.config.runner == "laya"
     assert explorer.config.provider is None
-    assert explorer.decider == "laya-decider"
+    assert isinstance(explorer.decider, fake.LayaDeciderStub)
     assert explorer.context.provenance["backend"] == "mlx"
     assert explorer.context.provenance["model"] == "laya-mini"
     assert explorer.context.provenance["max_options_per_question"] == 8
@@ -311,18 +329,20 @@ def test_events_ordered_and_countable(fake, tmp_path):
 def test_artifacts_and_report_run_in_order(fake, tmp_path):
     rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
     assert rc == 0
+    workflow_calls = [kwargs for name, args, kwargs in fake.calls if name == "artifacts.write_workflow"]
+    assert workflow_calls == [{"terminal": "done"}]
     assert fake.names == [
         "laya.discover",
         "laya.laya_decider",
         "explorer.run",
         "playwright_stage.run",
-        "keywatch.reconcile",
         "artifacts.write_events",
         "artifacts.write_workflow",
         "artifacts.write_defects",
-        "artifacts.write_run",
         "report.build_report",
+        "artifacts.write_run",
         "report.open_report",
+        "keywatch.reconcile",
     ]
 
 
@@ -357,3 +377,102 @@ def test_max_steps_reaches_the_config(fake, tmp_path):
     rc = cli.main(["--url", RUN_URL, "--max-steps", "7", "--yes", "--out", str(tmp_path)])
     assert rc == 0
     assert fake.explorers[0].config.max_steps == 7
+
+
+def test_playwright_marker_absent_mid_run_and_earned_after_stage(fake, tmp_path):
+    captured = {}
+
+    class ProvenanceExplorer(FakeExplorer):
+        def run(self):
+            captured.update(self.context.provenance)
+            return super().run()
+
+    import jev_ultrafast.qa.cli as cli_mod
+
+    cli_mod.Explorer = ProvenanceExplorer
+    try:
+        rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
+    finally:
+        cli_mod.Explorer = FakeExplorer
+    assert rc == 0
+    assert captured["backend"] == "mlx"
+    assert captured["model"] == "laya-mini"
+    assert captured["max_options_per_question"] == 8
+    assert captured["vision_stage"] == "off"
+    assert "playwright_stage" not in captured  # never claimed before the stage runs
+    final = fake.explorers[0].context.provenance
+    assert final["playwright_stage"] == "on"  # earned only after a successful sweep
+
+
+def test_failure_path_writes_partial_artifacts_and_skips_report(fake, capsys, tmp_path):
+    class ExplodingExplorer(FakeExplorer):
+        def run(self):
+            raise RuntimeError("CDP daemon died mid-run")
+
+    cli.Explorer = ExplodingExplorer
+    try:
+        rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
+    finally:
+        cli.Explorer = FakeExplorer
+    assert rc == 1
+    assert "Run failed: CDP daemon died mid-run" in capsys.readouterr().out
+    context = fake.explorers[0].context
+    assert context.provenance["run_error"] == "CDP daemon died mid-run"
+    for name in (
+        "artifacts.write_events",
+        "artifacts.write_workflow",
+        "artifacts.write_defects",
+        "artifacts.write_run",
+    ):
+        assert name in fake.names
+    assert "report.build_report" not in fake.names
+    assert "report.open_report" not in fake.names
+    assert "playwright_stage.run" not in fake.names  # died before the stage
+    folders = [path for path in tmp_path.iterdir() if path.is_dir()]
+    assert len(folders) == 1
+
+
+def test_keywatch_failure_cannot_discard_run_evidence(fake, capsys, tmp_path):
+    fake_keywatch = sys.modules["jev_ultrafast.qa.keywatch"]
+
+    def raise_busy(*_a, **_k):
+        raise RuntimeError("LockBusy: keywatch.json is locked")
+
+    fake_keywatch.reconcile = raise_busy
+    rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
+    assert rc == 0
+    assert "Keywatch cleanup failed" in capsys.readouterr().out
+    for name in ("artifacts.write_run", "report.build_report", "report.open_report"):
+        assert name in fake.names
+    folders = [path for path in tmp_path.iterdir() if path.is_dir()]
+    assert len(folders) == 1
+
+
+def test_laya_model_falls_back_to_transport_slug(fake, tmp_path):
+    fake.discover_result = {"backend": "mlx", "max_options_per_question": 8, "models": []}
+    rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
+    assert rc == 0
+    assert fake.explorers[0].context.provenance["model"] == "localdecide"
+    assert fake.explorers[0].context.provenance["backend"] == "mlx"
+
+
+def test_laya_models_echoing_backend_is_not_recorded_twice(fake, tmp_path):
+    fake.discover_result = {"backend": "laya-mlx", "max_options_per_question": 8, "models": ["laya-mlx"]}
+    rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
+    assert rc == 0
+    provenance = fake.explorers[0].context.provenance
+    assert provenance["backend"] == "laya-mlx"
+    assert provenance["model"] == "localdecide"  # falls back to the transport slug
+
+
+def test_unopenable_target_is_setup_failure_not_a_defect(fake, capsys, tmp_path):
+    fake.terminal = "browser_error"
+    fake.add_events = False
+    rc = cli.main(["--url", RUN_URL, "--yes", "--out", str(tmp_path)])
+    assert rc == 2
+    out = capsys.readouterr().out
+    assert "Could not open" in out
+    assert "injected open failure" in out
+    assert "artifacts.write_events" not in fake.names
+    assert "report.build_report" not in fake.names
+    assert fake.explorers[0].context.findings == []
