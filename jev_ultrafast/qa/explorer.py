@@ -14,7 +14,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from ..browser import Browser
+from ..browser import Browser, StalePage
 from ..model import action_space
 from .contracts import RUNNER_LAYA, STATUS_CANDIDATE, PageEvent
 
@@ -82,6 +82,7 @@ def _looks_like_error_page(page):
 
 SETTLE_POLL_SECONDS = 0.5
 SETTLE_MAX_SECONDS = 10.0
+MAX_STALE_RECOVERIES = 3
 
 
 def _has_substance(page):
@@ -105,7 +106,16 @@ def _settle(observe, sleep=None, monotonic=None):
     deadline = monotonic() + SETTLE_MAX_SECONDS
     polls = 0
     while True:
-        page = observe()
+        try:
+            page = observe()
+        except Exception:
+            # A snapshot that fails mid-mount is the same race in a different
+            # costume: keep polling, and only surface the error if the whole
+            # budget expires without a usable page.
+            if monotonic() >= deadline:
+                raise
+            sleep(SETTLE_POLL_SECONDS)
+            continue
         polls += 1
         if _has_substance(page) or monotonic() >= deadline:
             return page, polls
@@ -180,6 +190,7 @@ class Explorer:
         config, context = self.config, self.context
         history = []
         pending = None
+        stale = 0
         step = 0
         while True:
             _elements, targets, _controls = action_space(page["actions"])
@@ -238,6 +249,22 @@ class Explorer:
             text = decision.get("text") or ""
             try:
                 browser.act(action, page, text=text or None)
+            except StalePage:
+                # The page moved between the snapshot and this action. That is
+                # the harness's own race against a still-mounting site, not a
+                # fault in the target: re-observe and keep walking. Nothing
+                # executed, so no event and no finding; the marker line tells a
+                # reader why the same step number is judged twice. The bounded
+                # counter stops a permanently flickering page.
+                self._log_decision(step, page, targets, error="stale snapshot")
+                stale += 1
+                context.provenance["explorer_stale_retries"] = stale
+                step -= 1  # nothing executed, so this attempt costs no step
+                if stale > MAX_STALE_RECOVERIES:
+                    context.provenance["explorer_settle"] = f"stale after {stale} recoveries"
+                    return "stale_page"
+                page, _ = _settle(lambda: browser.observe(screenshot=False))
+                continue
             except Exception as exc:
                 event = PageEvent(
                     step=step,
@@ -266,6 +293,7 @@ class Explorer:
                 if finding is not None:
                     event.failing = True
                 return "browser_error"
+            stale = 0
             try:
                 fresh = browser.observe(screenshot=False)
             except Exception as exc:

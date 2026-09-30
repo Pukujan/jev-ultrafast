@@ -60,7 +60,7 @@ PROVENANCE_TEXT_KEYS = (
     "openjev_base",
     "openjev_version",
 )
-PROVENANCE_INT_KEYS = ("max_options_per_question", "openjev_load_ms")
+PROVENANCE_INT_KEYS = ("max_options_per_question", "openjev_load_ms", "explorer_stale_retries")
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -121,6 +121,7 @@ _TERMINAL_LABELS = {
     "max_steps": "steps-limit",
     "decider_exhausted": "decider-exhausted",
     "browser_error": "browser-error",
+    "stale_page": "stale-page",
 }
 
 
