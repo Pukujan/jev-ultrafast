@@ -153,6 +153,29 @@ Blocked/uncertain:
 Next:
 - Merge this increment, rerun the single Design Bakery pass from merged main with the repaired evidence stage, and post its independent-confirmation receipt on #9.
 
+### 2026-09-30 02:08:16 UTC — Luna worker (arms comparison), owner-directed scope to Jev and OpenJev
+
+<!-- continuity:checkpoint {"agent":"Luna worker (arms comparison), owner-directed scope to Jev and OpenJev","blocked":["Hidden holdout grading belongs to the independent reviewer; Study OS product depth needs a path past the login gate; the four named gaps (loopback text source, off-origin attribution, stale budget, zero-progress signal) await owner decisions."],"changed":["checkpoints/CURRENT.md, tasks/TASK-JUF-0003-frontend-qa-bootstrap.md, docs/benchmarks/** (new comparison folder and catalog rows)."],"completed":["Recorded the two-arm live acceptance comparison in the repository: four single post-fix jev-qa runs at main adca368 (Jev and OpenJev against design-bakery.com and study.design-bakery.com), published as docs/benchmarks/frontend-qa-arms-2026-09-29/ with the harness's own Mermaid workflow sources, full defect CSVs, a machine summary, and a plain-language report. Owner direction dropped the Laya arm from this comparison; the shipped Laya default in code is unchanged."],"decisions":["Laya excluded from this comparison by owner direction, docs only; study-OS guest depth stays unproven rather than called a pass; four harness gaps are recorded as owner decisions, not silently patched."],"evidence":["Recomputed from run folders before writing: Jev 14 executed steps over 6 pages with one dead control and 37 mostly off-origin link rows; OpenJev 25 steps on one page, fingerprint unchanged throughout, dead control at step 1; Jev on Study OS answered BLOCKED at 0.33-0.36 with zero clicks; OpenJev reached the credentials form and died on a TYPE_TEXT with no text source. Copied charts and CSVs verified md5-identical to their sources; ruff and continuity validate green."],"next_action":"Push the docs branch, open the PR Refs #9, and carry the four gap decisions to the owner on the leaf.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JUF-0003","timestamp":"2026-09-30T02:08:16Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"ab57f0bb05c00e25d54036953fccda76434da0016f5bc954be996a9b6ab81c46","request_id":"juf-0003-20260930-armsdocs1","schema":"project-continuity.checkpoint-operation.v1","task_id":"JUF-0003"} -->
+
+Completed:
+- Recorded the two-arm live acceptance comparison in the repository: four single post-fix jev-qa runs at main adca368 (Jev and OpenJev against design-bakery.com and study.design-bakery.com), published as docs/benchmarks/frontend-qa-arms-2026-09-29/ with the harness's own Mermaid workflow sources, full defect CSVs, a machine summary, and a plain-language report. Owner direction dropped the Laya arm from this comparison; the shipped Laya default in code is unchanged.
+
+Evidence:
+- Recomputed from run folders before writing: Jev 14 executed steps over 6 pages with one dead control and 37 mostly off-origin link rows; OpenJev 25 steps on one page, fingerprint unchanged throughout, dead control at step 1; Jev on Study OS answered BLOCKED at 0.33-0.36 with zero clicks; OpenJev reached the credentials form and died on a TYPE_TEXT with no text source. Copied charts and CSVs verified md5-identical to their sources; ruff and continuity validate green.
+
+Decisions:
+- Laya excluded from this comparison by owner direction, docs only; study-OS guest depth stays unproven rather than called a pass; four harness gaps are recorded as owner decisions, not silently patched.
+
+Changed:
+- checkpoints/CURRENT.md, tasks/TASK-JUF-0003-frontend-qa-bootstrap.md, docs/benchmarks/** (new comparison folder and catalog rows).
+
+Blocked/uncertain:
+- Hidden holdout grading belongs to the independent reviewer; Study OS product depth needs a path past the login gate; the four named gaps (loopback text source, off-origin attribution, stale budget, zero-progress signal) await owner decisions.
+
+Next:
+- Push the docs branch, open the PR Refs #9, and carry the four gap decisions to the owner on the leaf.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → docs/qa/adapter-spec.md → issue #9
