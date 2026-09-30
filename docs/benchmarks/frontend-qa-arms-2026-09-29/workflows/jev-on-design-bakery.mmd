@@ -1,0 +1,35 @@
+flowchart TD
+    S1["1. CLICK #91;1#93; DB End-to-End Engineer → www.design-bakery.com"]
+    S2["2. CLICK #91;2#93; Research → www.design-bakery.com"]
+    S3["3. CLICK #91;3#93; Blogs → www.design-bakery.com"]
+    S4["4. CLICK #91;4#93; Projects → www.design-bakery.com"]
+    S5["5. CLICK #91;5#93; Experience → www.design-bakery.com"]
+    S6["6. CLICK #91;6#93; About → www.design-bakery.com"]
+    S7["7. CLICK #91;7#93; Contact → www.design-bakery.com"]
+    S8["8. CLICK #91;8#93; button → www.design-bakery.com"]
+    S9["9. CLICK #91;8#93; button → www.design-bakery.com"]
+    S10["10. CLICK #91;8#93; button → www.design-bakery.com"]
+    S11["11. CLICK #91;10#93; LinkedIn /pujan3645 → www.linkedin.com"]
+    S12["12. CLICK #91;8#93; About → about.linkedin.com"]
+    S13["13. SCROLL_DOWN Scroll down → about.linkedin.com"]
+    S14["14. CLICK #91;1#93; LinkedIn Logo 
+  
+ LinkedIn Logo 
+ LinkedIn → www.linkedin.com"]
+    T(["stale-page (14 steps, 1 failing)"])
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+    S6 --> S7
+    S7 --> S8
+    S8 --> S9
+    S9 --> S10
+    S10 --> S11
+    S11 --> S12
+    S12 --> S13
+    S13 --> S14
+    S14 --> T
+    class S5 failing
+    classDef failing fill:#c0392b,color:#fff
