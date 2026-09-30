@@ -1,0 +1,8 @@
+flowchart TD
+    S1["1. CLICK #91;4#93; Sign in → study.design-bakery.com"]
+    S2["2. TYPE_TEXT #91;6#93; Email → study.design-bakery.com"]
+    T(["browser-error (2 steps, 1 failing)"])
+    S1 --> S2
+    S2 --> T
+    class S2 failing
+    classDef failing fill:#c0392b,color:#fff
