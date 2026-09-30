@@ -404,3 +404,46 @@ def test_failed_decider_is_recorded_with_its_error(tmp_path):
     assert exp.run() == "decider_exhausted"
     record = json.loads((Path(tmp_path) / "decisions.jsonl").read_text(encoding="utf-8"))
     assert "Invalid Decisions response" in record["error"]
+
+
+class StaleOnceBrowser(FakeBrowser):
+    """Raises StalePage on the first action only, the way a mounting page does."""
+
+    def __init__(self, observations):
+        super().__init__(observations)
+        self.strikes = 1
+
+    def act(self, action, page, text=None):
+        if self.strikes:
+            self.strikes -= 1
+            raise explorer_mod.StalePage("Page changed since this decision. Observe again.")
+        return super().act(action, page, text=text)
+
+
+def test_stale_action_is_retried_without_a_finding(tmp_path):
+    first, second = make_page(fingerprint="fp-a"), make_page(fingerprint="fp-b")
+    browser = StaleOnceBrowser([first, second, second, second])
+    config = RunConfig(target_url="https://example.test/", runner="laya")
+    context = RunContext(config=config, run_id="run", run_dir=str(tmp_path), started_at=0.0)
+    decider = FakeDecider([click(), click(), {"operation": "DONE"}])
+    exp = explorer_mod.Explorer(config, context, browser_factory=lambda url: browser, decider=decider)
+    assert exp.run() == "done"
+    assert context.findings == []  # a harness race is never reported as a site defect
+    assert context.provenance["explorer_stale_retries"] == 1
+    assert [event.step for event in context.events] == [1]  # the retried attempt costs no step
+    lines = [json.loads(line) for line in (Path(tmp_path) / "decisions.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [line.get("error") for line in lines] == [None, "stale snapshot", None, None]
+
+
+def test_permanently_flickering_page_stops_the_walk_cleanly(tmp_path):
+    page = make_page()
+    browser = FakeBrowser([page] * 12, act_error=explorer_mod.StalePage("Page changed since this decision."))
+    config = RunConfig(target_url="https://example.test/", runner="laya")
+    context = RunContext(config=config, run_id="run", run_dir=str(tmp_path), started_at=0.0)
+    decider = FakeDecider([click()] * 8)
+    exp = explorer_mod.Explorer(config, context, browser_factory=lambda url: browser, decider=decider)
+    assert exp.run() == "stale_page"
+    assert context.findings == []
+    assert context.events == []
+    assert context.provenance["explorer_stale_retries"] == explorer_mod.MAX_STALE_RECOVERIES + 1
+    assert context.provenance["explorer_settle"].startswith("stale after")
