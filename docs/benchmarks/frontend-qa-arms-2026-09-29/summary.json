@@ -3,7 +3,10 @@
   "date_utc": "2026-09-30",
   "cli_commit": "adca368",
   "cli_commit_predecessor": "a8fd5e7",
-  "viewport": { "width": 1280, "height": 720 },
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
   "max_steps": 25,
   "goals": [
     "check every visible navigation and menu link works",
@@ -17,12 +20,21 @@
       "model": "typesafe/jev-1.13",
       "run_dir": "qa-runs-jev-f/2026-09-29 www.design-bakery.com check every visible",
       "executed_steps": 14,
-      "operations_executed": { "CLICK": 13, "SCROLL_DOWN": 1 },
+      "operations_executed": {
+        "CLICK": 13,
+        "SCROLL_DOWN": 1
+      },
       "decisions_recorded": 28,
-      "decision_operations": { "CLICK": 20, "SCROLL_DOWN": 1 },
+      "decision_operations": {
+        "CLICK": 20,
+        "SCROLL_DOWN": 1
+      },
       "stale_snapshot_markers": 7,
       "stale_recoveries": 4,
-      "confidence_range": [0.27, 0.95],
+      "confidence_range": [
+        0.27,
+        0.95
+      ],
       "distinct_urls": 6,
       "visited_urls": [
         "https://www.design-bakery.com/",
@@ -35,8 +47,12 @@
       "terminal": "stale_page",
       "settle": "stale after 4 recoveries",
       "findings": {
-        "total": 164, "confirmed": 137, "candidate": 27,
-        "layout": 126, "broken_link": 37, "dead_control": 1
+        "total": 164,
+        "confirmed": 137,
+        "candidate": 27,
+        "layout": 126,
+        "broken_link": 37,
+        "dead_control": 1
       },
       "notes": "The only arm that browsed several target pages. It clicked Research, Blogs, Projects, then three nav controls that changed nothing, raised one dead control (Experience), then followed a footer link to LinkedIn at step 11. Most of its 37 broken-link rows were measured on LinkedIn's own pages after that, so they describe LinkedIn, not the target."
     },
@@ -47,21 +63,35 @@
       "model": "hf.co/apus-ailab/APUS-OpenJev-v1-4B-GGUF:Q4_K_M",
       "run_dir": "qa-runs-openjev-fX/2026-09-29 www.design-bakery.com check every visible",
       "executed_steps": 25,
-      "operations_executed": { "CLICK": 25 },
+      "operations_executed": {
+        "CLICK": 25
+      },
       "decisions_recorded": 27,
-      "decision_operations": { "SCROLL_DOWN": 1, "CLICK": 25 },
+      "decision_operations": {
+        "SCROLL_DOWN": 1,
+        "CLICK": 25
+      },
       "stale_snapshot_markers": 1,
       "stale_recoveries": 1,
-      "confidence_range": [0.459, 0.658],
+      "confidence_range": [
+        0.459,
+        0.658
+      ],
       "distinct_urls": 1,
-      "visited_urls": ["https://www.design-bakery.com/"],
+      "visited_urls": [
+        "https://www.design-bakery.com/"
+      ],
       "terminal": "max_steps",
       "settle": "settled after 2 polls",
       "findings": {
-        "total": 53, "confirmed": 51, "candidate": 2,
-        "layout": 50, "broken_link": 2, "dead_control": 1
+        "total": 53,
+        "confirmed": 51,
+        "candidate": 2,
+        "layout": 50,
+        "broken_link": 2,
+        "dead_control": 1
       },
-      "notes": "All 25 executed clicks chose the same hero control, which stopped changing the page after the second. The dead control is real and corroborated; the repetition is a model-quality finding. The two broken links are bot walls (LinkedIn 999, Behance 400) and stayed candidates."
+      "notes": "All 25 executed clicks chose the same hero control and the page fingerprint never changed once, so the dead control was real and raised at step 1. The repetition is a model-quality finding, not a site defect. The two broken links are bot walls (LinkedIn 999, Behance 400) and stayed candidates."
     },
     {
       "target": "https://study.design-bakery.com",
@@ -72,16 +102,25 @@
       "executed_steps": 0,
       "operations_executed": {},
       "decisions_recorded": 3,
-      "decision_operations": { "WAIT": 1, "BLOCKED": 1 },
+      "decision_operations": {
+        "WAIT": 1,
+        "BLOCKED": 1
+      },
       "stale_snapshot_markers": 1,
       "stale_recoveries": 1,
-      "confidence_range": [0.33, 0.36],
+      "confidence_range": [
+        0.33,
+        0.36
+      ],
       "distinct_urls": 0,
       "visited_urls": [],
       "terminal": "blocked",
       "settle": "settled after 1 polls",
       "findings": {
-        "total": 1, "confirmed": 0, "candidate": 1, "browser_error": 1
+        "total": 1,
+        "confirmed": 0,
+        "candidate": 1,
+        "browser_error": 1
       },
       "notes": "The page had real controls, and the model still answered BLOCKED against a login-gated guest view without clicking anything. The single candidate is two console errors on one row: an inline theme script and the Cloudflare insights beacon, both refused by the site's own script-src 'self' policy, independently confirmed from response headers."
     },
@@ -92,18 +131,33 @@
       "model": "hf.co/apus-ailab/APUS-OpenJev-v1-4B-GGUF:Q4_K_M",
       "run_dir": "qa-runs-openjev-study-f/2026-09-29 study.design-bakery.com check every visible",
       "executed_steps": 2,
-      "operations_executed": { "CLICK": 1, "TYPE_TEXT": 1 },
+      "operations_executed": {
+        "CLICK": 1,
+        "TYPE_TEXT": 1
+      },
       "decisions_recorded": 4,
-      "decision_operations": { "WAIT": 1, "CLICK": 1, "TYPE_TEXT": 1 },
+      "decision_operations": {
+        "WAIT": 1,
+        "CLICK": 1,
+        "TYPE_TEXT": 1
+      },
       "stale_snapshot_markers": 1,
       "stale_recoveries": 1,
-      "confidence_range": [0.577, 0.998],
+      "confidence_range": [
+        0.577,
+        0.998
+      ],
       "distinct_urls": 1,
-      "visited_urls": ["https://study.design-bakery.com/"],
+      "visited_urls": [
+        "https://study.design-bakery.com/"
+      ],
       "terminal": "browser_error",
       "settle": "settled after 1 polls",
       "findings": {
-        "total": 3, "confirmed": 0, "candidate": 3, "browser_error": 3
+        "total": 3,
+        "confirmed": 0,
+        "candidate": 3,
+        "browser_error": 3
       },
       "notes": "Clicked Sign in, reached the credentials form, then chose TYPE_TEXT on the Email field. A loopback arm carries no text source, so the browser call failed with a CDP parameter error: the harness artifact, not a site defect, and it ended the walk. The other two candidates are the same CSP console errors the Jev row recorded."
     }
