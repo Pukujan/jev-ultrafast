@@ -8,9 +8,11 @@ stages corroborate them. The explorer never claims an HTTP status.
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 from ..browser import Browser
 from ..model import action_space
@@ -78,6 +80,38 @@ def _looks_like_error_page(page):
     )
 
 
+SETTLE_POLL_SECONDS = 0.5
+SETTLE_MAX_SECONDS = 10.0
+
+
+def _has_substance(page):
+    """True when the snapshot offers real controls or visible text, not just scroll/wait."""
+    kinds = {action.get("kind") for action in page.get("actions") or []}
+    return bool(kinds & {"click", "fill", "select"}) or bool((page.get("text") or "").strip())
+
+
+def _settle(observe, sleep=None, monotonic=None):
+    """Observe until the page has substance or the deadline passes.
+
+    Client-rendered sites report document-complete while the app bundle is
+    still mounting: the first snapshot then holds zero controls, and a
+    decision model handed an empty page answers DONE or BLOCKED correctly.
+    defect. Returns (page, polls); the caller records whether the page ever
+    gained controls, and the walk continues either way so a genuinely
+    control-free site still produces evidence instead of a blocked run.
+    """
+    sleep = sleep or time.sleep
+    monotonic = monotonic or time.monotonic
+    deadline = monotonic() + SETTLE_MAX_SECONDS
+    polls = 0
+    while True:
+        page = observe()
+        polls += 1
+        if _has_substance(page) or monotonic() >= deadline:
+            return page, polls
+        sleep(SETTLE_POLL_SECONDS)
+
+
 class Explorer:
     """Observe, decide, execute, re-observe; append one PageEvent per cycle."""
 
@@ -126,7 +160,9 @@ class Explorer:
             return "browser_error"
         try:
             try:
-                page = browser.observe(screenshot=False)
+                page, polls = _settle(lambda: browser.observe(screenshot=False))
+                gained = "settled" if _has_substance(page) else "no substance"
+                self.context.provenance["explorer_settle"] = f"{gained} after {polls} polls"
             except Exception as exc:
                 self.context.provenance["explorer_open_error"] = f"{type(exc).__name__}: {exc}"[:200]
                 terminal = "browser_error"
@@ -149,14 +185,18 @@ class Explorer:
             _elements, targets, _controls = action_space(page["actions"])
             try:
                 decision = self.decider.decide(page, goal, history)
-            except StopIteration:
+            except StopIteration as exc:
+                self._log_decision(step, page, targets, error=f"StopIteration: {exc}")
                 return "decider_exhausted"
-            except (KeyError, ValueError):
+            except (KeyError, ValueError) as exc:
                 # A decider that cannot answer its own snapshot is exhausted, not
                 # a browser fault: stop cleanly without inventing a finding.
+                self._log_decision(step, page, targets, error=f"{type(exc).__name__}: {exc}")
                 return "decider_exhausted"
             if not isinstance(decision, dict):
+                self._log_decision(step, page, targets, error=f"non-dict decision: {decision!r}")
                 return "decider_exhausted"
+            self._log_decision(step, page, targets, decision=decision)
             operation = decision.get("operation")
             if operation in {"DONE", "BLOCKED"}:
                 return operation.lower()
@@ -327,7 +367,38 @@ class Explorer:
 
             if step >= config.max_steps:
                 return "max_steps"
+            if not _has_substance(fresh):
+                # The dead-control and error-page checks above compared the raw
+                # snapshot; only the next decision must not see a page that is
+                # still mounting after this action.
+                fresh, _ = _settle(lambda: browser.observe(screenshot=False))
             page = fresh
+
+    def _log_decision(self, step, page, targets, decision=None, error=None):
+        """Append one judgment to decisions.jsonl before its action is observed.
+
+        PageEvents record what happened to the browser; this record is the
+        model's own answer — which candidates it saw, what it picked, how sure
+        it was — so a zero-step run says why it stopped instead of going
+        silent. No page text: labels, counts, and the chosen ids only.
+        """
+        record = {
+            "step": step + 1,
+            "url": page.get("url"),
+            "runner": self.config.runner,
+            "candidates": {operation: len(ids) for operation, ids in (targets or {}).items()},
+        }
+        if error is not None:
+            record["error"] = error[:200]
+        if decision is not None:
+            for key in ("operation", "target", "choice", "confidence"):
+                record[key] = decision.get(key)
+        try:
+            path = Path(self.context.run_dir) / "decisions.jsonl"
+            with path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(record, sort_keys=True) + "\n")
+        except OSError:
+            pass  # diagnostics never break a walk
 
     def _finish(self, terminal):
         self.context.provenance["explorer_terminal"] = terminal

@@ -1,5 +1,8 @@
 """Offline tests for the guided exploration loop: scripted fake browser, queued fake decider."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from jev_ultrafast.qa import explorer as explorer_mod
@@ -315,3 +318,89 @@ def test_jev_provenance_has_no_flattening(tmp_path):
     assert context.provenance["explorer_terminal"] == "done"
     assert "laya_criteria_flattening" not in context.provenance
     assert all(event.runner == "jev" for event in context.events)
+
+
+def _substantive_page(**kwargs):
+    return make_page(**kwargs)
+
+
+def _shell_page():
+    # What a client-rendered site offers before its bundle mounts: no text and
+    # only the scroll/wait pseudo-actions that every snapshot carries.
+    return make_page(
+        text="",
+        actions=[
+            {"id": "scroll_down", "kind": "scroll", "label": "Scroll down", "delta": 560},
+            {"id": "wait", "kind": "wait", "label": "Wait for the page to update"},
+        ],
+    )
+
+
+def test_settle_waits_past_the_empty_shell_before_deciding(tmp_path, monkeypatch):
+    state = {"n": 0}
+
+    def fake_monotonic():
+        state["n"] += 1
+        return state["n"] * 1.0  # advances 1s per check, inside the 10s budget
+
+    monkeypatch.setattr(explorer_mod.time, "monotonic", fake_monotonic)
+    slept = []
+    monkeypatch.setattr(explorer_mod.time, "sleep", slept.append)
+    shell, hydrated = _shell_page(), make_page(fingerprint="fp-real")
+    browser = FakeBrowser([shell, shell, hydrated, hydrated, hydrated])
+    decider = FakeDecider([click(), {"operation": "DONE"}])
+    config = RunConfig(target_url="https://example.test/", runner="laya")
+    context = RunContext(config=config, run_id="run", run_dir=str(tmp_path), started_at=0.0)
+    exp = explorer_mod.Explorer(config, context, browser_factory=lambda url: browser, decider=decider)
+    assert exp.run() == "done"
+    assert context.provenance["explorer_settle"].startswith("settled after")
+    assert decider.states[0]["text"], "the model was shown the empty shell"
+
+
+def test_settle_times_out_without_hiding_the_run(tmp_path, monkeypatch):
+    clock = {"now": 0.0}
+
+    def fake_monotonic():
+        value = clock["now"]
+        clock["now"] += 4.0  # blows the 10s budget on the third look
+        return value
+
+    monkeypatch.setattr(explorer_mod.time, "monotonic", fake_monotonic)
+    shell = _shell_page()
+    exp, context, _, decider = build(tmp_path, [shell] * 6, [{"operation": "BLOCKED"}])
+    assert exp.run() == "blocked"
+    assert context.provenance["explorer_settle"].startswith("no substance after")
+    assert decider.states[0]["text"] == ""  # the shell is still walked, and said so
+
+
+def test_has_substance_needs_real_controls_or_text():
+    assert explorer_mod._has_substance(make_page())
+    assert not explorer_mod._has_substance(_shell_page())
+    assert explorer_mod._has_substance({**_shell_page(), "text": "mounted"})
+
+
+def test_zero_step_run_still_records_the_judgment(tmp_path):
+    exp, context, _, _ = build(tmp_path, [make_page()], [{"operation": "DONE", "confidence": 0.42}])
+    assert exp.run() == "done"
+    assert context.events == []  # nothing executed
+    lines = (Path(tmp_path) / "decisions.jsonl").read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 1
+    record = json.loads(lines[0])
+    assert record["operation"] == "DONE" and record["confidence"] == 0.42 and record["step"] == 1
+    assert record["candidates"] == {"CLICK": 2, "TYPE_TEXT": 1}  # what the model was offered
+
+
+def test_failed_decider_is_recorded_with_its_error(tmp_path):
+    class BrokenDecider:
+        name = "broken"
+
+        def decide(self, state, goal, history):
+            raise ValueError("Invalid Decisions response; no action executed.")
+
+    config = RunConfig(target_url="https://example.test/", runner="jev")
+    context = RunContext(config=config, run_id="run", run_dir=str(tmp_path), started_at=0.0)
+    browser = FakeBrowser([make_page()])
+    exp = explorer_mod.Explorer(config, context, browser_factory=lambda url: browser, decider=BrokenDecider())
+    assert exp.run() == "decider_exhausted"
+    record = json.loads((Path(tmp_path) / "decisions.jsonl").read_text(encoding="utf-8"))
+    assert "Invalid Decisions response" in record["error"]

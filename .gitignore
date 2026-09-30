@@ -7,7 +7,7 @@ __pycache__/
 .DS_Store
 artifacts/
 *.egg-info/
-qa-runs/
+qa-runs*/
 qa-holdout/
 
 dist/
