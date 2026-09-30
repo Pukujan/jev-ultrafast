@@ -56,8 +56,11 @@ PROVENANCE_TEXT_KEYS = (
     "vision_provider",
     "run_error",
     "explorer_terminal",
+    "explorer_settle",
+    "openjev_base",
+    "openjev_version",
 )
-PROVENANCE_INT_KEYS = ("max_options_per_question",)
+PROVENANCE_INT_KEYS = ("max_options_per_question", "openjev_load_ms")
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 

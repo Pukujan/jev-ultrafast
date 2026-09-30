@@ -131,6 +131,12 @@ class OpenRouterTransport:
 
     name = "openrouter"
 
+    @property
+    def model_slug(self):
+        # Same resolution build_request_body applies when no slug is passed, so the
+        # Decider can name the model in provenance without changing the request body.
+        return os.environ.get("OPENROUTER_MODEL") or os.environ.get("TYPESAFE_MODEL") or "typesafe/jev-1.13"
+
     def prepare(self, body):
         return body
 

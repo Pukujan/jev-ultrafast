@@ -19,9 +19,13 @@ RUNNERS = (RUNNER_LAYA, RUNNER_JEV)
 PROVIDER_OPENROUTER = "openrouter"
 PROVIDER_TYPESAFE = "typesafe"
 PROVIDER_OPENCODE = "opencode"
+PROVIDER_OPENJEV = "openjev"
 PROVIDER_VISION = "vision"
-JEV_PROVIDERS = (PROVIDER_OPENROUTER, PROVIDER_TYPESAFE, PROVIDER_OPENCODE)
+JEV_PROVIDERS = (PROVIDER_OPENROUTER, PROVIDER_TYPESAFE, PROVIDER_OPENCODE, PROVIDER_OPENJEV)
 JEV_DEFAULT_PROVIDER = PROVIDER_OPENROUTER
+# Arms whose decision model runs on this machine: no credential, loopback only.
+# openjev is an APUS-OpenJev GGUF served by a local Ollama.
+LOCAL_JEV_PROVIDERS = (PROVIDER_OPENJEV,)
 
 # Local Laya runtime: ChenneyZhuang/laya-browser-agent, `localdecide serve`,
 # binding 127.0.0.1. Discovery is healthz-first; missing runtime fails closed.
@@ -44,6 +48,8 @@ PROVIDER_ENV_ALIASES: dict[str, tuple[str, ...]] = {
     ),
     PROVIDER_TYPESAFE: ("TYPESAFE_API_KEY", "TYPESAFE_SYSTEMONE_URL", "TYPESAFE_MODEL"),
     PROVIDER_OPENCODE: ("OPENCODE_API_KEY", "OPENCODE_BASE_URL"),
+    # Local arm: endpoint and model names only; it has no credential by design.
+    PROVIDER_OPENJEV: ("OPENJEV_OLLAMA_URL", "OPENJEV_MODEL"),
     # Vision stays separate from the Jev decision credential (issue #9).
     PROVIDER_VISION: (
         "VISION_API_KEY",

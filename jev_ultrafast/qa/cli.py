@@ -21,6 +21,7 @@ from .contracts import (
     DEFAULT_MAX_STEPS,
     JEV_PROVIDERS,
     KEYWATCH_STATE,
+    LOCAL_JEV_PROVIDERS,
     PROVIDER_ENV_ALIASES,
     PROVIDER_OPENROUTER,
     RUNNER_JEV,
@@ -128,48 +129,62 @@ def _run(args):
     provider = args.provider.strip().lower()
     new_key_inserted = False
     opted_out = False
+    openjev_info = None
     if runner == RUNNER_JEV:
         if not provider and not yes:
-            provider = ask("Provider openrouter/typesafe/opencode [openrouter]: ").lower()
+            provider = ask("Provider openrouter/typesafe/opencode/openjev [openrouter]: ").lower()
         provider = provider or PROVIDER_OPENROUTER
         if provider not in JEV_PROVIDERS:
             say(f"Unknown provider {provider!r}; expected one of {', '.join(JEV_PROVIDERS)}.")
             return 2
-        providers = _import("providers")
-        try:
-            candidates = providers.discover(provider) or []
-        except Exception as exc:
-            say(f"Provider discovery failed: {exc}")
-            return 2
-        key_names = [c["name"] for c in candidates if str(c.get("name", "")).upper().endswith("API_KEY")]
-        primary = PROVIDER_ENV_ALIASES[provider][0]
-        ordered = [primary] if primary in key_names else []
-        ordered.extend(name for name in key_names if name != primary)
-        chosen = None
-        for name in ordered:
-            if yes or providers.confirm_candidate(name):
-                chosen = name
-                break
-        if not chosen:
-            variable = primary
-            if yes:
-                say(f"No {provider} credential found and no key was typed; rerun interactively to enter one.")
+        if provider in LOCAL_JEV_PROVIDERS:
+            # A local arm needs no credential: its model runs on loopback, so key
+            # discovery stays out of the path, exactly like the laya arm. The
+            # warm-up probe fails closed before any browser work.
+            openjev = _import("openjev")
+            local_transport = openjev.OpenJevTransport()
+            try:
+                openjev_info = local_transport.preflight() or {}
+            except openjev.OpenJevUnavailable as exc:
+                say(str(exc))
                 return 2
-            value = providers.secure_entry(variable)
-            if not value:
-                say("No key entered; nothing to run.")
+            say(f"OpenJev ready ({openjev_info.get('model')}, warm in {openjev_info.get('load_ms')} ms).")
+        else:
+            providers = _import("providers")
+            try:
+                candidates = providers.discover(provider) or []
+            except Exception as exc:
+                say(f"Provider discovery failed: {exc}")
                 return 2
-            record = providers.insert_key(providers.env_file_path(), variable, value, state_path=state_path)
-            new_key_inserted = True
-            opted_out = ask("Remove this typed key after 3 hours idle? [Y/n] ").lower().startswith("n")
-            if isinstance(record, dict) and record.get("opted_out"):
-                opted_out = True  # a persisted opt-out is honored; the typed answer stays authoritative
-            chosen = variable
-        found = providers.read_env_value(chosen)
-        if found:
-            # Make a file-resident credential visible to the transport wiring for
-            # this process only. The value is never printed.
-            os.environ.setdefault(chosen, found)
+            key_names = [c["name"] for c in candidates if str(c.get("name", "")).upper().endswith("API_KEY")]
+            primary = PROVIDER_ENV_ALIASES[provider][0]
+            ordered = [primary] if primary in key_names else []
+            ordered.extend(name for name in key_names if name != primary)
+            chosen = None
+            for name in ordered:
+                if yes or providers.confirm_candidate(name):
+                    chosen = name
+                    break
+            if not chosen:
+                variable = primary
+                if yes:
+                    say(f"No {provider} credential found and no key was typed; rerun interactively to enter one.")
+                    return 2
+                value = providers.secure_entry(variable)
+                if not value:
+                    say("No key entered; nothing to run.")
+                    return 2
+                record = providers.insert_key(providers.env_file_path(), variable, value, state_path=state_path)
+                new_key_inserted = True
+                opted_out = ask("Remove this typed key after 3 hours idle? [Y/n] ").lower().startswith("n")
+                if isinstance(record, dict) and record.get("opted_out"):
+                    opted_out = True  # a persisted opt-out is honored; the typed answer stays authoritative
+                chosen = variable
+            found = providers.read_env_value(chosen)
+            if found:
+                # Make a file-resident credential visible to the transport wiring for
+                # this process only. The value is never printed.
+                os.environ.setdefault(chosen, found)
 
     # 4. Playwright evidence stage: default on, independently skippable.
     playwright = not args.no_playwright
@@ -258,11 +273,24 @@ def _run(args):
                 # healthz names no model; record what the transport actually sends.
                 context.provenance["model"] = slug
     else:
-        decider = _import("jev_runner").jev_decider(provider)
+        try:
+            if provider in LOCAL_JEV_PROVIDERS:
+                decider = _import("openjev").openjev_decider()
+            else:
+                decider = _import("jev_runner").jev_decider(provider)
+        except (RuntimeError, ValueError) as exc:
+            # An unconfigured arm (missing endpoint/key env, unknown provider) fails
+            # closed before any browser work; the message names what is missing.
+            say(str(exc))
+            return 2
         if getattr(decider, "name", None):
             context.provenance["backend"] = decider.name
         if getattr(decider, "model_slug", None):
             context.provenance["model"] = decider.model_slug
+        if isinstance(openjev_info, dict):
+            for key in ("base", "version"):
+                if openjev_info.get(key):
+                    context.provenance[f"openjev_{key}"] = openjev_info[key]
 
     try:
         terminal = Explorer(config, context, decider=decider).run()
