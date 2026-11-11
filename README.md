@@ -12,7 +12,7 @@ A browser agent with a **dynamic, indexed action space** — built for real site
 
 You want an agent to finish a real page task — search flights, open a Wikipedia article, explore a lesson as a guest — without hand-written site scripts. Prompting a model to invent Playwright or CSS selectors looks easy until the DOM shifts, a control is covered, or the model emits something the browser should never run.
 
-**Selectors from the model are out of bounds.** Ultrafast observes the page, numbers the controls you can actually use, and asks [OpenRouter Decisions](https://openrouter.ai/docs/guides/community/jev) (`typesafe/jev-1.13`) for an operation and a target in **one request**. A small text model runs only when the operation is `TYPE_TEXT`.
+**Selectors from the model are out of bounds.** Ultrafast observes the page, numbers the controls you can actually use, and asks [OpenRouter Decisions](https://openrouter.ai/docs/guides/community/jev) (`typesafe/jev-1.14`) for an operation and a target in **one request**. A small text model runs only when the operation is `TYPE_TEXT`.
 
 ## What this project is
 
@@ -56,7 +56,7 @@ Operations: `CLICK`, `TYPE_TEXT`, `SELECT`, `SCROLL_UP`, `SCROLL_DOWN`, `WAIT`, 
 | Claim | What the evidence supports | What it does not establish | Source |
 | --- | --- | --- | --- |
 | Flights demo ~7.1 s at 1× with independent verification | Timed run (7.073 s) after first observation, including model + browser work; matched-run medians in the performance doc | Broad agent benchmark; strong statistics (three pairs) | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/performance.md#faster-on-the-real-web](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/performance.md#faster-on-the-real-web) |
-| OpenRouter Decisions only; no TypeSafe key | POLICY names endpoint, model `typesafe/jev-1.13`, and OpenRouter auth | Every historical upstream README sentence — prefer POLICY on this fork | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only) |
+| OpenRouter Decisions only; no TypeSafe key | POLICY names endpoint, model `typesafe/jev-1.14`, and OpenRouter auth | Every historical upstream README sentence — prefer POLICY on this fork | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/POLICY.md#openrouter-decisions-only) |
 | Study-os guest crawl artifacts exist | 2026-09-27 summary: pages visited, `openrouter_decisions_ok`, defect_count 11 | Full PDD coverage or schema byte-identity with Study-os | [https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/benchmarks/study-os-2026-09-27/summary.json#L1](https://github.com/Pukujan/jev-ultrafast/blob/041d5242bb9159a588b09d303a19a0208cf9a95c/docs/benchmarks/study-os-2026-09-27/summary.json#L1) |
 
 **Boundaries:** demos do not book or purchase; Ultrafast does not own Study-os code or private study logs; the model must never emit selectors, coordinates, shell, or executable JavaScript.
@@ -100,7 +100,7 @@ uv run --env-file .env python examples/run.py \
 | --- | --- |
 | `OPENROUTER_API_KEY` | Required for Decisions |
 | `OPENROUTER_DECISIONS_URL` | Default `https://openrouter.ai/api/alpha/decisions` |
-| `OPENROUTER_MODEL` | OpenRouter Decisions model **slug** (default `typesafe/jev-1.13`). Not a separate provider; does not bypass OpenRouter Decisions. |
+| `OPENROUTER_MODEL` | OpenRouter Decisions model **slug** (default `typesafe/jev-1.14`). Not a separate provider; does not bypass OpenRouter Decisions. |
 | `TEXT_MODEL_API_KEY` / `TEXT_MODEL_BASE_URL` / `TEXT_MODEL` | Required only for `TYPE_TEXT` (example uses OpenRouter chat + `inception/mercury-2.5`) |
 
 ### Small enough to read

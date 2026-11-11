@@ -67,7 +67,7 @@ def typesafe_transport():
     key = os.environ.get("TYPESAFE_API_KEY")
     if not key:
         raise TransportUnavailable("The typesafe arm needs TYPESAFE_API_KEY; it is not set.")
-    model_slug = os.environ.get("TYPESAFE_MODEL", "typesafe/jev-1.13")
+    model_slug = os.environ.get("TYPESAFE_MODEL", "typesafe/jev-1.14")
     return EnvEndpointTransport(PROVIDER_TYPESAFE, url, key, model_slug)
 
 

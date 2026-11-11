@@ -33,7 +33,7 @@ def answers_for(body, operation="CLICK", target="1"):
     for name, question in body["questions"].items():
         if name.endswith("_target") and name == operation.lower() + "_target":
             answers[name] = valid_answer(question["criteria"], target)
-    return {"answers": answers, "model": "typesafe/jev-1.13", "usage": {}}
+    return {"answers": answers, "model": "typesafe/jev-1.14", "usage": {}}
 
 
 def test_default_choose_uses_three_positional_args(monkeypatch):
@@ -64,7 +64,7 @@ def test_build_request_body_env_model_read_at_call_time(monkeypatch):
     body = model.build_request_body(STATE, "goal", [])
     assert body["model"] == "some/other-slug"
     monkeypatch.delenv("OPENROUTER_MODEL")
-    assert model.build_request_body(STATE, "goal", [])["model"] == "typesafe/jev-1.13"
+    assert model.build_request_body(STATE, "goal", [])["model"] == "typesafe/jev-1.14"
 
 
 def test_build_request_body_explicit_slug_wins(monkeypatch):

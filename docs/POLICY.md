@@ -17,7 +17,7 @@ Adopters **use** Ultrafast for crawls and defect reports. They do **not** own fo
   default decision path for the agent loop
 - Auth: `OPENROUTER_API_KEY` (server-side / env; never commit keys). The main
   agent still requires no `TYPESAFE_API_KEY`.
-- Model: `OPENROUTER_MODEL` defaults to `typesafe/jev-1.13`. That value is an
+- Model: `OPENROUTER_MODEL` defaults to `typesafe/jev-1.14`. That value is an
   **OpenRouter model slug** in the Decisions body, not a TypeSafe-account or
   System One backend switch.
 - **No TypeSafe key required for the agent.** Decisions via OpenRouter stays
