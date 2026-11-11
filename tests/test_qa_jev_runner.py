@@ -32,7 +32,7 @@ class FakeTransport:
 
 class OpenRouterTransportStub:
     name = "openrouter"
-    model_slug = "typesafe/jev-1.13"
+    model_slug = "typesafe/jev-1.14"
 
     instances = []
 
@@ -52,7 +52,7 @@ def test_openrouter_maps_to_the_model_transport(monkeypatch):
     decider = jev_runner.jev_decider("openrouter")
     assert isinstance(decider.transport, OpenRouterTransportStub)
     assert decider.name == "openrouter"
-    assert decider.model_slug == "typesafe/jev-1.13"
+    assert decider.model_slug == "typesafe/jev-1.14"
     assert len(OpenRouterTransportStub.instances) == 1
 
 

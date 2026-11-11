@@ -113,7 +113,7 @@ def build_request_body(state, goal, history, model_slug=None):
         "model": model_slug
         or os.environ.get(
             "OPENROUTER_MODEL",
-            os.environ.get("TYPESAFE_MODEL", "typesafe/jev-1.13"),
+            os.environ.get("TYPESAFE_MODEL", "typesafe/jev-1.14"),
         ),
         "state": {
             "page": {k: state[k] for k in ("url", "title", "text")},
@@ -135,7 +135,7 @@ class OpenRouterTransport:
     def model_slug(self):
         # Same resolution build_request_body applies when no slug is passed, so the
         # Decider can name the model in provenance without changing the request body.
-        return os.environ.get("OPENROUTER_MODEL") or os.environ.get("TYPESAFE_MODEL") or "typesafe/jev-1.13"
+        return os.environ.get("OPENROUTER_MODEL") or os.environ.get("TYPESAFE_MODEL") or "typesafe/jev-1.14"
 
     def prepare(self, body):
         return body
@@ -143,7 +143,7 @@ class OpenRouterTransport:
     def request(self, body):
         # Always OpenRouter Decisions first. Auth is OPENROUTER_API_KEY only.
         # OPENROUTER_MODEL is the OpenRouter model slug in the Decisions body
-        # (e.g. typesafe/jev-1.13) — not a separate provider or TypeSafe-account path.
+        # (e.g. typesafe/jev-1.14) — not a separate provider or TypeSafe-account path.
         decisions_url = os.environ.get(
             "OPENROUTER_DECISIONS_URL", "https://openrouter.ai/api/alpha/decisions"
         )

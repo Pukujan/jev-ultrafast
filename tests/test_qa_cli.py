@@ -116,7 +116,7 @@ def fake(monkeypatch):
 
     class JevDeciderStub:
         name = "openrouter"
-        model_slug = "typesafe/jev-1.13"
+        model_slug = "typesafe/jev-1.14"
 
     jev_runner = types.ModuleType("jev_ultrafast.qa.jev_runner")
     jev_runner.jev_decider = rec("jev_runner.jev_decider", lambda: JevDeciderStub())
@@ -249,7 +249,7 @@ def test_jev_blank_provider_defaults_openrouter(fake, tmp_path):
     assert explorer.config.runner == "jev"
     assert explorer.config.provider == "openrouter"
     assert explorer.context.provenance["backend"] == "openrouter"
-    assert explorer.context.provenance["model"] == "typesafe/jev-1.13"
+    assert explorer.context.provenance["model"] == "typesafe/jev-1.14"
 
 
 def test_yes_without_any_credential_fails_closed(fake, capsys, tmp_path):

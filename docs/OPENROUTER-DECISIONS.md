@@ -8,7 +8,7 @@ Alex clarified: **no TypeSafe key**. Use the OpenRouter Decisions API with `OPEN
 | --- | --- |
 | URL | `POST https://openrouter.ai/api/alpha/decisions` |
 | Auth | `Authorization: Bearer $OPENROUTER_API_KEY` |
-| Model (OpenRouter slug) | `typesafe/jev-1.13` (alias `~typesafe/jev-latest` is rolling). Slug only — not a separate provider. |
+| Model (OpenRouter slug) | `typesafe/jev-1.14` (alias `~typesafe/jev-latest` is rolling). Slug only — not a separate provider. |
 | Docs | [Jev hub](https://openrouter.ai/docs/guides/community/jev), [Decisions reference](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), [tutorial](https://openrouter.ai/docs/guides/community/jev-tutorial) |
 
 **Not** Chat Completions. Jev returns typed answers (choice / noul / score), not prose.
@@ -17,7 +17,7 @@ Alex clarified: **no TypeSafe key**. Use the OpenRouter Decisions API with `OPEN
 
 ```json
 {
-  "model": "typesafe/jev-1.13",
+  "model": "typesafe/jev-1.14",
   "state": { "page": {}, "elements": [], "recent_actions": [] },
   "questions": {
     "operation": {
@@ -45,7 +45,7 @@ Question primitives (same as System One):
 ```json
 {
   "id": "gen-dec-...",
-  "model": "typesafe/jev-1.13-20260917",
+  "model": "typesafe/jev-1.14-20261014",
   "provider": "TypeSafe",
   "answers": {
     "operation": {
@@ -69,12 +69,12 @@ In `choose()`, replace the hardcoded TypeSafe System One call with Decisions + O
 
 - Default URL: `https://openrouter.ai/api/alpha/decisions` (`OPENROUTER_DECISIONS_URL` override)
 - Key: `OPENROUTER_API_KEY` only (no `TYPESAFE_API_KEY` fallback)
-- Default model slug: `typesafe/jev-1.13` via `OPENROUTER_MODEL` (legacy alias `TYPESAFE_MODEL` sets the same OpenRouter slug only)
+- Default model slug: `typesafe/jev-1.14` via `OPENROUTER_MODEL` (legacy alias `TYPESAFE_MODEL` sets the same OpenRouter slug only)
 
 `field_text()` is unchanged: still uses `TEXT_MODEL_*` OpenAI-compatible chat for TYPE_TEXT only (example already points at OpenRouter chat).
 
 
-## 2b. What `OPENROUTER_MODEL=typesafe/jev-1.13` means
+## 2b. What `OPENROUTER_MODEL=typesafe/jev-1.14` means
 
 It is an **OpenRouter model slug**, not a separate decision backend.
 
@@ -84,7 +84,7 @@ It is an **OpenRouter model slug**, not a separate decision backend.
 | "Setting OPENROUTER_MODEL switches provider" | False. The value is only the `model` field in the Decisions JSON body. |
 | "Response `provider: TypeSafe` means we bypassed OpenRouter" | False. OpenRouter may route the slug to TypeSafe infrastructure; auth and HTTP path stay OpenRouter Decisions. |
 
-Gates/DGM runs that set `OPENROUTER_MODEL=typesafe/jev-1.13` are still on the OpenRouter Decisions path. To change the slug, keep the same env var; do not introduce a TypeSafe key or System One URL.
+Gates/DGM runs that set `OPENROUTER_MODEL=typesafe/jev-1.14` are still on the OpenRouter Decisions path. To change the slug, keep the same env var; do not introduce a TypeSafe key or System One URL.
 
 ## 3. Env vars
 
@@ -93,7 +93,7 @@ Required for decisions:
 ```bash
 OPENROUTER_API_KEY=          # Alex Desktop OpenRouter key
 OPENROUTER_DECISIONS_URL=https://openrouter.ai/api/alpha/decisions   # optional; this is the default
-OPENROUTER_MODEL=typesafe/jev-1.13                                   # optional; this is the default
+OPENROUTER_MODEL=typesafe/jev-1.14                                   # optional; this is the default
 ```
 
 Required only when the agent must TYPE_TEXT (fill fields):
@@ -132,7 +132,7 @@ Sources: OpenRouter Jev docs + Decisions reference; local `jev_ultrafast/{model,
 
 ## 6. Study-os live crawl benchmark (2026-09-27)
 
-Recorded guest UX defect crawl against https://study.design-bakery.com using OpenRouter Decisions (`typesafe/jev-1.13`):
+Recorded guest UX defect crawl against https://study.design-bakery.com using OpenRouter Decisions (`typesafe/jev-1.14`):
 
 - This fork: [docs/benchmarks/study-os-2026-09-27/](./benchmarks/study-os-2026-09-27/) (75 actions, 11 defects; P0 D004 Worked example)
 - Study-os durable copy: `docs/benchmarks/ux-defect-jev-ultrafast/2026-09-27/` in Pukujan/Study-os (Refs #126 #147)

@@ -3,7 +3,7 @@
 Read README.md, PROJECT.md, and checkpoints/CURRENT.md before editing. Keep the loop small: page -> indexed elements -> operation + target -> execution.
 
 - The input is one natural-language goal. Do not add site-specific plans or hardcoded field values.
-- OpenRouter Decisions (model `typesafe/jev-1.13`) chooses an operation and operation-specific target heads in one request. Consume only the selected operation's target. **No TypeSafe key.**
+- OpenRouter Decisions (model `typesafe/jev-1.14`) chooses an operation and operation-specific target heads in one request. Consume only the selected operation's target. **No TypeSafe key.**
 - Targets must map to observed elements and supported operations. Never let the model emit selectors or executable code.
 - TYPE_TEXT invokes the text LLM (`TEXT_MODEL_*` via OpenRouter chat). Cache a stale retry's value only while its entire helper input is identical.
 - Never retry a browser mutation. Log execution before observing its result.
